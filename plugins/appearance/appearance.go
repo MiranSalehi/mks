@@ -2,7 +2,7 @@
 // preset, the primary color, the color mode, the sidebar style, corner radius, font size,
 // density, the form field style and where labels go. A manager sets the company look and saves named looks (at most 24); every
 // user may set their own, which wins over the company's. The UI receives them in
-// meta.extra.appearance. Its frontend half is @mks/mks/appearance.
+// meta.extra.appearance. Its frontend half is @mksine/mks/appearance.
 //
 //	p.Use(&appearance.Plugin{Orm: facades.Orm()})
 //

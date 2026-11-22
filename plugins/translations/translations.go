@@ -3,7 +3,7 @@
 // here both are rows in the database). The UI receives them in meta.extra.translations
 // and meta.extra.locales. A new language is translated over a base language (fa or en):
 // texts not translated yet show in the base, and the server answers in the base too.
-// Its frontend half is @mks/mks/translations.
+// Its frontend half is @mksine/mks/translations.
 //
 //	p.Use(&translations.Plugin{Orm: facades.Orm()})
 //

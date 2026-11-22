@@ -1,6 +1,6 @@
 // Package cms is the panel's content management plugin, a native port of the MKSine CMS:
 // pages (simple and block-based) with revisions, trash and preview, site menus, and a
-// public site renderer. Its frontend half is @mks/mks/cms.
+// public site renderer. Its frontend half is @mksine/mks/cms.
 //
 // A site is a panel tenant: every CMS table has a site_id column holding the tenant key,
 // and the panel scopes every query to the current tenant. Tenancy is therefore required.

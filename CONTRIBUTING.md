@@ -23,7 +23,7 @@ pnpm check:exports
 go vet ./... && go test -race ./...
 ```
 
-The UI packages must build cleanly: `pnpm build` runs tsup for `@mks/mks` and every
+The UI packages must build cleanly: `pnpm build` runs tsup for `@mksine/mks` and every
 plugin and writes `dist/`.
 
 ## Rules

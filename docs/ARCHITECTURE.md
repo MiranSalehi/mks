@@ -17,7 +17,7 @@ The result: reactivity is instant (no round trip to the server, unlike Livewire)
 ### Frontend (`resources/posts.tsx`)
 
 ```tsx
-import { defineResource } from '@mks/mks'
+import { defineResource } from '@mksine/mks'
 import type { Post } from '../generated/types' // generated from the backend
 
 export default defineResource<Post>({
@@ -225,7 +225,7 @@ The UI reads values from `meta.extra`; the sidebar applies `extra.navigation` (t
 
 ### First-party plugins
 
-The plugins ship in the same package: a Go package at `plugins/<name>` and a frontend subpath `@mks/mks/<name>`.
+The plugins ship in the same package: a Go package at `plugins/<name>` and a frontend subpath `@mksine/mks/<name>`.
 
 | Plugin | What it does | Permissions |
 |---|---|---|
@@ -435,11 +435,11 @@ mks/                          # repository root = the package
 ├── setup/                    # artisan package:install installer
 ├── docs/                     # architecture, protocol, publishing
 ├── go.mod                    # github.com/MiranSalehi/mks
-├── package.json              # @mks/mks
+├── package.json              # @mksine/mks
 └── styles.css                # built from src/styles.css (not committed)
 ```
 
-- Frontend: one npm package, `@mks/mks`, with the plugins as subpath exports
+- Frontend: one npm package, `@mksine/mks`, with the plugins as subpath exports
 - Go: the module at the repository root; it needs nothing else
 - The application that uses the package lives in its own repository; it supplies the models, the migrations, the built UI (`go:embed`) and the wiring
 

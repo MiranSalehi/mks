@@ -302,7 +302,7 @@ function LoggedIn({
 }
 
 // ProtocolMismatch is a visible warning, not just a console line: a stale UI (an old
-// go:embed, or @mks/mks not matching the Go module) fails in confusing ways, silently.
+// go:embed, or @mksine/mks not matching the Go module) fails in confusing ways, silently.
 function ProtocolMismatch({ server, ui }: { server: number; ui: number }) {
   return (
     <div
@@ -321,7 +321,7 @@ function ProtocolMismatch({ server, ui }: { server: number; ui: number }) {
       }}
     >
       The panel's UI and server versions do not match: the server speaks protocol {server}, this UI
-      speaks {ui}. Rebuild the frontend (or run <code>./artisan mks:assets</code>) so @mks/mks and
+      speaks {ui}. Rebuild the frontend (or run <code>./artisan mks:assets</code>) so @mksine/mks and
       the Go module are on the same version.
     </div>
   )

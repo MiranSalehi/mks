@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   npm:
-    name: Publish @mks/mks
+    name: Publish @mksine/mks
     runs-on: ubuntu-latest
     # Configure this environment (or use npm trusted publishing) before the first release.
     environment: npm

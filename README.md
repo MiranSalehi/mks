@@ -1,20 +1,20 @@
 # MKS
 
 [![CI](https://github.com/MiranSalehi/mks/actions/workflows/ci.yml/badge.svg)](https://github.com/MiranSalehi/mks/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/@mks/mks)](https://www.npmjs.com/package/@mks/mks)
+[![npm](https://img.shields.io/npm/v/@mksine/mks)](https://www.npmjs.com/package/@mksine/mks)
 [![Go reference](https://pkg.go.dev/badge/github.com/MiranSalehi/mks.svg)](https://pkg.go.dev/github.com/MiranSalehi/mks)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 An admin panel for Goravel: a React/TypeScript UI, a Go backend, and a language-neutral JSON protocol between them.
 
 The repository is the package itself: the Go module `github.com/MiranSalehi/mks`
-**and** the npm package `@mks/mks` ship from the same tree — the Filament-style core
+**and** the npm package `@mksine/mks` ship from the same tree — the Filament-style core
 plus the MKSine CMS and first-party plugins.
 
-The plugins live in the same npm package as subpath exports (`@mks/mks/cms`,
-`@mks/mks/access`, …); nothing is installed separately.
+The plugins live in the same npm package as subpath exports (`@mksine/mks/cms`,
+`@mksine/mks/access`, …); nothing is installed separately.
 
-There is no demo application here. Wire the two halves into your own Goravel app: the Go module receives the models and permissions, and `@mks/mks` renders the panel from the resource definitions you write in TSX.
+There is no demo application here. Wire the two halves into your own Goravel app: the Go module receives the models and permissions, and `@mksine/mks` renders the panel from the resource definitions you write in TSX.
 
 ## Requirements
 
@@ -37,17 +37,17 @@ This registers `mks.ServiceProvider` in `bootstrap/providers.go`, publishes
 `bootstrap/migrations.go`). The frontend is one npm package:
 
 ```bash
-pnpm add @mks/mks
+pnpm add @mksine/mks
 ```
 
 The panel's UI is your own frontend build: a Vite (or any bundler) entry that imports
-`@mks/mks` and renders `<Panel>`. Ship that build to the Go server one of two ways:
+`@mksine/mks` and renders `<Panel>`. Ship that build to the Go server one of two ways:
 
 - **Embed it.** `go:embed` the build output and bind that `fs.FS` at `mks.UIBinding`.
 - **Serve it from disk.** `./artisan mks:assets` copies the build (default `admin/dist`)
   into `public/vendor/mks`; bind `os.DirFS("public/vendor/mks")` at `mks.UIBinding`. A
   frontend change then lands without a Go rebuild, and the command warns when the Go
-  module and the installed `@mks/mks` versions differ.
+  module and the installed `@mksine/mks` versions differ.
 
 > Until a tagged release is available, use a local path in `go.mod`:
 >
@@ -142,9 +142,9 @@ p.Routes(facades.Route())
 **TSX** — the client for those resources (see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)):
 
 ```tsx
-import { Panel, defineResource } from '@mks/mks'
-import { cms } from '@mks/mks/cms'
-import '@mks/mks/styles.css'
+import { Panel, defineResource } from '@mksine/mks'
+import { cms } from '@mksine/mks/cms'
+import '@mksine/mks/styles.css'
 
 createRoot(document.getElementById('root')!).render(
   <Panel basePath="/admin" brand="MKS" resources={[posts]} plugins={[cms()]} />,
@@ -155,7 +155,7 @@ createRoot(document.getElementById('root')!).render(
 
 ```css
 @import "tailwindcss";
-@import "@mks/mks/styles.css";
+@import "@mksine/mks/styles.css";
 ```
 
 ## Commands
@@ -165,7 +165,7 @@ The Go module adds these artisan commands to your app (`mks` category):
 | Command | What it does |
 |---|---|
 | `mks:types` | Writes TypeScript types for the registered resources |
-| `mks:assets` | Copies the built frontend from `@mks/mks` into the app (`--from`, `--to`, `--prune`) |
+| `mks:assets` | Copies the built frontend from `@mksine/mks` into the app (`--from`, `--to`, `--prune`) |
 | `mks:resource <Model> --model-import=...` | Generates starter Go config and a TSX resource from a model; `--model-import` is the import path of your own models package |
 | `mks:cms-media-copies` | Makes the smaller image copies the CMS uses (needs the cms plugin) |
 

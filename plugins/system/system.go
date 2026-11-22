@@ -7,7 +7,7 @@
 //     cap and a history.
 //
 // Both need their permission (system.health, system.console); give the console to full
-// managers only. Its frontend half is @mks/mks/system.
+// managers only. Its frontend half is @mksine/mks/system.
 //
 //	p.Use(&system.Plugin{Orm: facades.Orm(), Cache: facades.Cache(), Storage: facades.Storage(), Debug: debug})
 //

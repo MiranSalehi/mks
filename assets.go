@@ -15,7 +15,7 @@ import (
 )
 
 // AssetsCommand copies the panel's built frontend — the application's own Vite/whatever
-// build that imports @mks/mks — into a directory the application serves from disk.
+// build that imports @mksine/mks — into a directory the application serves from disk.
 //
 // An application usually embeds that build with go:embed (see the README). Copying is the
 // alternative: bind os.DirFS("public/vendor/mks") at mks.UIBinding, and a frontend change
@@ -51,8 +51,8 @@ func (*assetsCommand) Extend() command.Extend {
 			},
 			&command.StringFlag{
 				Name:  "package",
-				Value: "node_modules/@mks/mks",
-				Usage: "the installed @mks/mks, for the version check",
+				Value: "node_modules/@mksine/mks",
+				Usage: "the installed @mksine/mks, for the version check",
 			},
 			&command.BoolFlag{
 				Name:  "prune",

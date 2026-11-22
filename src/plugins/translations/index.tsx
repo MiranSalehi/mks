@@ -195,7 +195,7 @@ function Editor({ overrides, locales }: { overrides: Record<string, Record<strin
   const shownAdded = query ? added.filter((r) => r.key.toLowerCase().includes(query) || r.value.toLowerCase().includes(query)) : added
   const changed = Object.keys(draft).length + added.filter((r) => r.key.trim() !== '').length + deleted.size
 
-  const path = info && !info.built_in ? `panel_translations / ${lang}` : `@mks/mks/src/locales/${lang}.ts`
+  const path = info && !info.built_in ? `panel_translations / ${lang}` : `@mksine/mks/src/locales/${lang}.ts`
 
   function changeLang(code: string) {
     setLang(code)

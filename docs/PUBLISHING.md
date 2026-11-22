@@ -9,7 +9,7 @@ Only the repository owner can do these:
 
 1. **Make the GitHub repository public.** `go get` and npm provenance both need a public
    repository (a private repository requires `GOPRIVATE` and authenticated users).
-2. **Own the npm scope** (`@mks`). Create the organization on npm and invite the
+2. **Own the npm scope** (`@mksine`). Create the organization on npm and invite the
    maintainers, or rename the packages to a scope you own **before** the first release.
 3. **Configure publishing.** Either:
    - add an `NPM_TOKEN` repository secret (automation token with publish rights), or
@@ -69,7 +69,7 @@ Only the repository owner can do these:
    The module is the repository root, so the plain `vX.Y.Z` tag serves both: the Go
    proxy picks it up and the same tag triggers the npm workflow.
 
-6. The `Release` workflow publishes `@mks/mks` with `--provenance`. To publish from
+6. The `Release` workflow publishes `@mksine/mks` with `--provenance`. To publish from
    a machine instead:
 
    ```bash
@@ -84,12 +84,12 @@ Only the repository owner can do these:
    go mod init check
    go get github.com/MiranSalehi/mks@v0.1.1
    npm init -y
-   pnpm add @mks/mks@0.1.1
+   pnpm add @mksine/mks@0.1.1
    ```
 
 ## If something goes wrong
 
-- npm: `npm deprecate @mks/mks@0.1.1 "reason"` (a published version cannot be reused).
+- npm: `npm deprecate @mksine/mks@0.1.1 "reason"` (a published version cannot be reused).
 - Go: fix the tag by deleting and re-pushing it **before** it is cached by the proxy;
   after that, publish a new patch version.
 - Never re-tag a version that users may already have imported.

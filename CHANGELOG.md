@@ -9,7 +9,7 @@ Changes worth noting for each release are recorded here.
 - **The application boots without the panel.** `mks.ServiceProvider.Boot` no longer panics when the panel cannot be built (usually because `mks.UserBinding` is not bound yet): it logs the reason, keeps artisan commands working after `package:install`, and answers the panel path with `503` instead of taking every command down.
 - **The router fallback is optional.** `mks.fallback` / `Options.NoFallback` turn off the panel's catch-all, so an application with its own fallback (an SPA, a custom 404) can call `panel.ServeUI` from it; a router has one fallback and the last one wins, which silently broke the panel's client-side routes.
 - **Session is a declared dependency** in the provider's `Relationship()`, matching the session middleware the panel mounts.
-- **A protocol mismatch is visible.** The UI shows a banner when the server's protocol differs from its own instead of only writing to the console, and `mks:assets` warns when the Go module and `@mks/mks` versions differ.
+- **A protocol mismatch is visible.** The UI shows a banner when the server's protocol differs from its own instead of only writing to the console, and `mks:assets` warns when the Go module and `@mksine/mks` versions differ.
 
 ### Added
 
@@ -19,6 +19,8 @@ Changes worth noting for each release are recorded here.
 
 ### Changed
 
+- The npm package moved to the `@mksine` scope: it is now `@mksine/mks` (the Go module
+  path is unchanged). It was never published under the old name.
 - The source is English-only: comments, server messages, default content, page
   templates, theme text and UI defaults are translated. The Persian locale itself stays
   (`src/locales/fa.ts`, the `persian` table in `i18n.go`, `tr({ fa, … })`, `L(fa, …)`,
@@ -39,16 +41,16 @@ Changes worth noting for each release are recorded here.
 ## 0.1.0 — 2026-11-22
 
 First public release. One package is published as the Go module
-`github.com/MiranSalehi/mks` and the npm package `@mks/mks`
+`github.com/MiranSalehi/mks` and the npm package `@mksine/mks`
 (with the first-party plugins as subpath exports), all under the MIT license.
 
 The repository is the package itself: the Go module `github.com/MiranSalehi/mks` and
-the npm package `@mks/mks` ship from the same tree, at its root.
+the npm package `@mksine/mks` ship from the same tree, at its root.
 
 ### Added
 
 - Goravel package structure: `mks.ServiceProvider` (relationships, container binding, routes, commands, publishes), `setup/setup.go` for `artisan package:install`, a publishable `config/mks.go`, a core notifications migration registered in the application, and `facades.MKS()`.
-- The project is named **MKS**: the npm packages are `@mks/*`, the Go module is `github.com/MiranSalehi/mks`, the commands are `mks:*` (`mks:types`, `mks:resource`, `mks:cms-media-copies`, `mks:geo-import`), the panel's own CSS classes and browser keys are `mks-*`, and the brand is MKS.
+- The project is named **MKS**: the npm packages are `@mksine/*`, the Go module is `github.com/MiranSalehi/mks`, the commands are `mks:*` (`mks:types`, `mks:resource`, `mks:cms-media-copies`, `mks:geo-import`), the panel's own CSS classes and browser keys are `mks-*`, and the brand is MKS.
 - Rich editor like MKSine's CKEditor 5 (built on Tiptap): the same toolbar in the same order (Insert Media, Insert shortcode, undo/redo, Source, Show blocks, Paragraph and Styles dropdowns, font size, family, color and background, bold/italic/underline, link with Downloadable, table with a size grid and a column/row/merge toolbar, highlight markers and pens, block quote, code block with languages, alignment, bulleted/numbered lists with styles, start and reversed order, to-do list, indent/outdent), with items that do not fit under "⋮". Core: `addRichEditorButton` for plugin buttons, `richEditor().placeholder()` and `.height()`. The server keeps the editor's colors, sizes, fonts, alignment, named styles, to-do lists, video and audio and still drops everything else. CMS: `DescribeShortcode` and the `cms_shortcodes` meta list the shortcodes for the editor (ZIP plugins can give `label`, `description`, `example`).
 - Media picker like MKSine's: a large "Media library" window with search, a type filter, a drop zone that uploads several files, a 3–7 column grid, an "Attachment details" column (name, type, dimensions, size, upload date), "Showing … to … of …" pages and a footer with the selected count, Cancel and Confirm selection. One or several files are chosen and confirmed with the button. The field shows preview tiles and MKSine's dashed "Select / Change / Add media" button; galleries number their files and reorder by drag or arrows. The page builder no longer crashes when a block with a canvas error is opened.
 - Page builder like MKSine's: toolbar (component count, templates, undo/redo, full screen, add component), device widths, and a canvas that is the page as the server draws it with each block framed (name, edit, up, down, copy, delete) and "+" rows between blocks and inside columns; a side panel edits a block (Content and Block style tabs); the add dialog has MKSine's categories, icons, names and descriptions; blocks drag anywhere, between columns too.
@@ -65,7 +67,7 @@ the npm package `@mks/mks` ship from the same tree, at its root.
 - The geo plugin (countries, states, cities, the "Locations and addresses" settings tab and `/api/geo`) was built and then removed as not needed; migration `20261121000019_drop_geo` drops its tables and settings.
 - Site menus for CMS sites (now in the `cms` plugin): a `menus` resource per site with a header or footer location and a two-level item tree (page, link, group) in one JSON column, rendered on the public `/sites/{team}/{slug}` pages. Only pages that are public at request time are linked; unsafe link schemes are refused on save and on render.
 - `Select.optionsFrom(resource)` and `GET /resources/{resource}/options`: select options from the records of another resource, within its permissions, scope and tenant.
-- MKSine port as first-party plugins (Go `packages/mks/plugins/*`, UI `@mks/mks/*`):
+- MKSine port as first-party plugins (Go `packages/mks/plugins/*`, UI `@mksine/mks/*`):
   - `cms`: multi-site CMS where a site is a panel tenant. Pages (plain or block-based, revisions, trash, preview, copy), posts, nested categories, tags, comments with moderation and a public form, media library with resized variants and a picker, site menus, reusable sections and page templates, a 20-block page builder with live preview, custom content types, per-site settings and permalinks, Go themes with custom CSS/JS, hooks, filters and shortcodes, live SEO analysis with share tags, JSON-LD, `sitemap.xml` and `robots.txt`, and a versioned public page cache.
   - `access`: roles and permissions on the panel gate; users cannot grant permissions they do not hold.
   - `navigation`: panel menu editor (hide, rename, regroup, reorder).

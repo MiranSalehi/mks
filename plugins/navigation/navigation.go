@@ -2,7 +2,7 @@
 // menu editor): hide, rename, move between groups and order items, and rename, order or
 // hide groups. The settings travel to the UI in meta.extra.navigation; the sidebar
 // applies them. Hiding only tidies the menu: permissions still decide what a user may
-// open. Its frontend half is @mks/mks/navigation.
+// open. Its frontend half is @mksine/mks/navigation.
 //
 //	p.Use(&navigation.Plugin{Orm: facades.Orm()})
 //

@@ -2,7 +2,7 @@
 // Filament Shield in MKSine). Roles hold permissions; users get roles; the plugin installs
 // the panel's Gate, so every resource ability, action, widget and page needs a permission
 // of one of the user's roles, on top of the resource's own policy. Its frontend half is
-// @mks/mks/access.
+// @mksine/mks/access.
 //
 //	p.Use(&access.Plugin{Orm: facades.Orm(), UsersResource: "users"})
 //

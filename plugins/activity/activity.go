@@ -1,6 +1,6 @@
 // Package activity is a panel plugin that logs who created, changed or deleted what,
 // and shows the log as a read-only resource ("activities"). Its frontend half is
-// @mks/mks/activity.
+// @mksine/mks/activity.
 //
 //	p.Use(activity.Plugin{Authorize: func(ctx *mks.HookContext) bool { return isAdmin(ctx) }})
 //

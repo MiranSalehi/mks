@@ -50,13 +50,13 @@ func TestCopyTreeReportsAMissingPackage(t *testing.T) {
 }
 
 func TestVersionMismatch(t *testing.T) {
-	require.NoError(t, versionMismatch("v0.1.0", "@mks/mks", "0.1.0"))
-	require.NoError(t, versionMismatch("(devel)", "@mks/mks", "0.1.0"))
-	require.NoError(t, versionMismatch("v0.0.0", "@mks/mks", "0.1.0"))
-	require.NoError(t, versionMismatch("", "@mks/mks", "0.1.0"))
-	require.NoError(t, versionMismatch("v0.0.0-20260101000000-abcdef", "@mks/mks", "0.1.0"))
+	require.NoError(t, versionMismatch("v0.1.0", "@mksine/mks", "0.1.0"))
+	require.NoError(t, versionMismatch("(devel)", "@mksine/mks", "0.1.0"))
+	require.NoError(t, versionMismatch("v0.0.0", "@mksine/mks", "0.1.0"))
+	require.NoError(t, versionMismatch("", "@mksine/mks", "0.1.0"))
+	require.NoError(t, versionMismatch("v0.0.0-20260101000000-abcdef", "@mksine/mks", "0.1.0"))
 
-	err := versionMismatch("v0.1.0", "@mks/mks", "0.2.0")
+	err := versionMismatch("v0.1.0", "@mksine/mks", "0.2.0")
 	require.ErrorContains(t, err, "v0.1.0")
-	require.ErrorContains(t, err, "@mks/mks@0.2.0")
+	require.ErrorContains(t, err, "@mksine/mks@0.2.0")
 }

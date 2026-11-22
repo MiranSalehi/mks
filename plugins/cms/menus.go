@@ -18,7 +18,7 @@ const (
 	maxMenuLabel   = 100
 )
 
-// menusResource is the site navigation (menus in @mks/mks/cms). A menu is a two-level
+// menusResource is the site navigation (menus in @mksine/mks/cms). A menu is a two-level
 // tree in one JSON column; the hooks check every entry, keep only known fields and make
 // sure page entries point at pages of the same site.
 func (pl *Plugin) menusResource() mks.ModelResource[Menu] {

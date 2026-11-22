@@ -40,12 +40,12 @@ const exportedPlugins = Object.keys(exports)
 
 for (const plugin of plugins) {
   if (!exportedPlugins.includes(plugin)) {
-    problems.push(`src/plugins/${plugin} is not exported as "@mks/mks/${plugin}"`)
+    problems.push(`src/plugins/${plugin} is not exported as "@mksine/mks/${plugin}"`)
   }
 }
 for (const plugin of exportedPlugins) {
   if (!plugins.includes(plugin)) {
-    problems.push(`"@mks/mks/${plugin}" is exported but src/plugins/${plugin} does not exist`)
+    problems.push(`"@mksine/mks/${plugin}" is exported but src/plugins/${plugin} does not exist`)
   }
 }
 
