@@ -448,6 +448,8 @@ seeded user.
 | `not found database configuration` | `DB_CONNECTION` names a connection missing from `config/database.go` | Add the connection (step 2) |
 | `Authentication guard [admin] is not defined` | Guard missing from `config/auth.go` | Step 3 |
 | Login says the credentials do not match | The stored password is not a hash | Hash it (`facades.Hash().Make`) or use `Config.Hashed` |
+| `pnpm add @mksine/mks` hangs or resolves a strange local path | pnpm points at a mirror registry that does not have the version | Check `pnpm config get registry`; put `registry=https://registry.npmjs.org/` in the app's `.npmrc` |
+| pnpm refuses a brand-new version (`minimumReleaseAge`) | The registry policy waits before installing new releases | Approve it, or add the version to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml` |
 
 ## Optional: the CMS
 
