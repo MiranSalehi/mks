@@ -2,6 +2,16 @@
 
 Changes worth noting for each release are recorded here.
 
+## 0.1.3 — 2026-11-23
+
+### Fixed
+
+- **Fillable fields hidden from JSON are written now.** A model field tagged `json:"-"`
+  (a password, a token) was skipped when the panel decoded the payload, so a record
+  created in the panel got an empty password. Hidden fields are now set by their field
+  name (`password`, `phone_number`, …) when they are fillable. `Config.Hashed` depends on
+  this, so 0.1.2 could not hash a `json:"-"` password.
+
 ## 0.1.2 — 2026-11-23
 
 ### Added

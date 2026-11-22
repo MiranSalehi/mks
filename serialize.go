@@ -273,9 +273,18 @@ func (e fieldError) Error() string {
 func decodeInto(model any, data map[string]any) error {
 	rv := reflect.ValueOf(model).Elem()
 	fields := fieldsOf(rv.Type())
+	hidden := hiddenFieldsOf(rv.Type())
 
 	rest := map[string]any{}
 	for key, val := range data {
+		// Fields hidden from JSON (`json:"-"`) are still settable when they are fillable:
+		// e.g. a password, which is never sent back but is written on create/update.
+		if index, ok := hidden[key]; ok {
+			if err := setHidden(rv.FieldByIndex(index), key, val); err != nil {
+				return err
+			}
+			continue
+		}
 		info, ok := fields[key]
 		if !ok || !isTimeType(info.typ) {
 			rest[key] = val
@@ -298,6 +307,62 @@ func decodeInto(model any, data map[string]any) error {
 		return err
 	}
 	return nil
+}
+
+// setHidden writes a value into a field that JSON decoding skips.
+func setHidden(field reflect.Value, key string, val any) error {
+	if !field.CanAddr() {
+		return fieldError{field: key, kind: invalidTypeError}
+	}
+	raw, err := json.Marshal(val)
+	if err != nil {
+		return fieldError{field: key, kind: invalidTypeError, cause: err}
+	}
+	if err := json.Unmarshal(raw, field.Addr().Interface()); err != nil {
+		var typeErr *json.UnmarshalTypeError
+		if errors.As(err, &typeErr) {
+			return fieldError{field: key, kind: invalidTypeError}
+		}
+		return err
+	}
+	return nil
+}
+
+var hiddenFieldCache sync.Map // reflect.Type -> map[string][]int
+
+// hiddenFieldsOf maps the snake_case and lowercase names of `json:"-"` fields to their
+// index paths, following embedded structs. decodeInto uses it for fillable columns that
+// must never appear in a response but are still written (passwords, tokens).
+func hiddenFieldsOf(t reflect.Type) map[string][]int {
+	if cached, ok := hiddenFieldCache.Load(t); ok {
+		return cached.(map[string][]int)
+	}
+	out := map[string][]int{}
+	var walk func(t reflect.Type, prefix []int)
+	walk = func(t reflect.Type, prefix []int) {
+		for i := range t.NumField() {
+			f := t.Field(i)
+			idx := append(append([]int{}, prefix...), i)
+			if f.Anonymous && f.Tag.Get("json") == "" && f.Type.Kind() == reflect.Struct && !isTimeType(f.Type) {
+				walk(f.Type, idx)
+				continue
+			}
+			if !f.IsExported() {
+				continue
+			}
+			if _, _, skip := jsonName(f); !skip {
+				continue
+			}
+			for _, name := range []string{strings.ToLower(f.Name), snakeCase(f.Name)} {
+				if _, exists := out[name]; !exists {
+					out[name] = idx
+				}
+			}
+		}
+	}
+	walk(t, nil)
+	hiddenFieldCache.Store(t, out)
+	return out
 }
 
 func setTime(field reflect.Value, val any) error {
