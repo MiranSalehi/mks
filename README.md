@@ -1,204 +1,151 @@
-# MKS
+# @mksine/mks
 
+[![npm version](https://img.shields.io/npm/v/@mksine/mks)](https://www.npmjs.com/package/@mksine/mks)
+[![npm downloads](https://img.shields.io/npm/dm/@mksine/mks)](https://www.npmjs.com/package/@mksine/mks)
 [![CI](https://github.com/MiranSalehi/mks/actions/workflows/ci.yml/badge.svg)](https://github.com/MiranSalehi/mks/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/@mksine/mks)](https://www.npmjs.com/package/@mksine/mks)
 [![Go reference](https://pkg.go.dev/badge/github.com/MiranSalehi/mks.svg)](https://pkg.go.dev/github.com/MiranSalehi/mks)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MiranSalehi/mks/blob/main/LICENSE)
 
-An admin panel for Goravel: a React/TypeScript UI, a Go backend, and a language-neutral JSON protocol between them.
+The admin panel for [Goravel](https://goravel.dev): a Filament-style dashboard with
+resources, forms, tables, actions, policies and multi-tenancy, plus the MKSine CMS
+(pages, posts, media, menus, page builder, themes, ZIP plugins and SEO).
 
-The repository is the package itself: the Go module `github.com/MiranSalehi/mks`
-**and** the npm package `@mksine/mks` ship from the same tree — the Filament-style core
-plus the MKSine CMS and first-party plugins.
+One repository ships both halves, in lockstep:
 
-The plugins live in the same npm package as subpath exports (`@mksine/mks/cms`,
-`@mksine/mks/access`, …); nothing is installed separately.
+| Half | Distributed as | For |
+|---|---|---|
+| UI (React 19 + TypeScript) | npm package `@mksine/mks` | your frontend build (Vite, …) |
+| Backend (Go) | Go module `github.com/MiranSalehi/mks` | your Goravel application |
 
-There is no demo application here. Wire the two halves into your own Goravel app: the Go module receives the models and permissions, and `@mksine/mks` renders the panel from the resource definitions you write in TSX.
+The UI talks to the backend over a small, documented JSON protocol
+([PROTOCOL.md](https://github.com/MiranSalehi/mks/blob/main/docs/PROTOCOL.md)); the
+server stays the source of truth for data, validation and permissions.
+
+## Features
+
+- **Resources** — list, create, edit and view screens from one definition; searchable,
+  sortable and filterable columns with whitelists enforced server-side.
+- **Forms** — sections, grids, tabs, repeaters, builders, relation managers, media
+  pickers, rich text (Tiptap), code (CodeMirror), date pickers (Jalali and Gregorian),
+  conditional visibility and validation.
+- **Tables** — filters, badges, summaries, bulk actions, reordering, exports.
+- **Actions** — row and bulk actions with confirmation, forms, modals and hooks.
+- **Access control** — Goravel policies plus a panel-wide gate, roles and permissions,
+  per-resource abilities, and multi-tenancy scoped by the panel's tenant.
+- **Infolists, widgets and pages** — read-only record views, dashboard widgets, custom
+  pages and clusters.
+- **CMS** — pages, posts, categories, tags, comments, media library, menus, reusable
+  sections, page builder, themes, plugin ZIPs, shortcodes and an SEO analyzer.
+- **i18n** — English and Persian out of the box, RTL/LTR, custom locales and per-install
+  translation overrides.
+- **Typed** — `mks:types` generates TypeScript types from the Go resources; every subpath
+  ships `.d.ts` declarations.
 
 ## Requirements
 
-- Go 1.26 or newer — the floor comes from the package's dependency graph, not from
-  Goravel (v1.18 itself needs Go 1.25): the CMS image pipeline imports
-  `golang.org/x/image` v0.48, which declares `go 1.26.0`
-- Node 22 or newer and pnpm
-- MySQL 8 or newer (or PostgreSQL/SQLite) — for your app's data, not for the package itself
+- **Node 22+** and pnpm (or npm)
+- **React 19** and the TanStack packages listed under peer dependencies
+- For the Go half: **Go 1.26+** (required by the package's dependency graph — see
+  [the README](https://github.com/MiranSalehi/mks#requirements)) and **Goravel 1.18+**
 
 ## Install
 
-The Go half is a Goravel package with a service provider and an installer:
+### UI
+
+```bash
+pnpm add @mksine/mks
+pnpm add react react-dom @tanstack/react-query @tanstack/react-router @tanstack/react-table
+```
+
+### Go backend
 
 ```bash
 ./artisan package:install github.com/MiranSalehi/mks
 ```
 
-This registers `mks.ServiceProvider` in `bootstrap/providers.go`, publishes
-`config/mks.go`, and installs the core notifications migration (registered in
-`bootstrap/migrations.go`). The frontend is one npm package:
+This registers `mks.ServiceProvider`, publishes `config/mks.go` and installs the core
+notifications migration. Then bind the application pieces the panel cannot know (the user
+model, the built UI and the resources) in a service provider — see
+[Wiring](https://github.com/MiranSalehi/mks#wiring-the-two-halves).
 
-```bash
-pnpm add @mksine/mks
-```
-
-The panel's UI is your own frontend build: a Vite (or any bundler) entry that imports
-`@mksine/mks` and renders `<Panel>`. Ship that build to the Go server one of two ways:
-
-- **Embed it.** `go:embed` the build output and bind that `fs.FS` at `mks.UIBinding`.
-- **Serve it from disk.** `./artisan mks:assets` copies the build (default `admin/dist`)
-  into `public/vendor/mks`; bind `os.DirFS("public/vendor/mks")` at `mks.UIBinding`. A
-  frontend change then lands without a Go rebuild, and the command warns when the Go
-  module and the installed `@mksine/mks` versions differ.
-
-> Until a tagged release is available, use a local path in `go.mod`:
->
-> ```go
-> require github.com/MiranSalehi/mks v0.1.0
-> replace github.com/MiranSalehi/mks => ../mks
-> ```
-
-The panel cannot know an application's user model, resources or build, so the
-application binds a few small pieces in its own service provider:
-
-```go
-// app/providers/mks.go
-type MKSProvider struct{}
-
-func (*MKSProvider) Register(app foundation.Application) {
-    // A fresh user model for the panel's auth guard.
-    app.Singleton(mks.UserBinding, func(foundation.Application) (any, error) {
-        return mks.UserFactory(func() mks.User { return &models.User{} }), nil
-    })
-    // The built frontend (go:embed).
-    app.Singleton(mks.UIBinding, func(foundation.Application) (any, error) {
-        return adminui.FS(), nil
-    })
-    // Optional: change options before the panel is created (tenancy, …).
-    app.Singleton(mks.OptionsBinding, func(foundation.Application) (any, error) {
-        return mks.OptionsHook(func(o *mks.Options) {
-            o.Tenancy = &mks.TenancyOptions{Tenants: userTeams}
-        }), nil
-    })
-    // Resources and plugins.
-    app.Singleton(mks.ConfigureBinding, func(foundation.Application) (any, error) {
-        return mks.ConfigureHook(func(p *mks.Panel) {
-            p.Register(posts)
-            p.Use(&cms.Plugin{Orm: app.MakeOrm()})
-        }), nil
-    })
-}
-
-func (*MKSProvider) Boot(foundation.Application) {}
-```
-
-Register `&mks.ServiceProvider{}` (installed above) and `&MKSProvider{}` in
-`bootstrap/providers.go`. After boot, `facades.MKS()` (from
-`github.com/MiranSalehi/mks/facades`) returns the panel, for example
-in application commands. The types an app or a plugin implements (`Plugin`,
-`Resource`, `User`, hooks, options) are also exported from
-`github.com/MiranSalehi/mks/contracts`, the conventional Goravel
-`contracts/` import path.
-
-Until `MKSProvider` is registered the application keeps working — artisan commands
-included — and the panel path answers `503` with the missing piece. This matters
-right after `package:install`, before the user model is bound.
-
-The `mks:types` command is registered by the package; application-specific commands
-such as `mks:resource` stay in `bootstrap/commands.go`.
-
-If your application installs its own router fallback (for an SPA or a custom 404),
-set `mks.fallback` to `false` / `Options.NoFallback: true` and call
-`panel.ServeUI(ctx)` from that fallback. A router has one fallback: whichever is
-registered last wins, and the panel's client-side routes would otherwise 404 after
-a reload.
-
-The installer creates the core notifications table. The first-party plugins expose
-their own tables as `CreateTable(schema.Schema)` functions (for example
-`cms.CreateTable`); add those calls to your application's migrations when you enable
-the plugins.
-
-## Manual wiring (advanced)
-
-The service provider above is the standard path. Constructing the panel directly is
-still supported for tests and unusual setups — for example when the panel must exist
-before Goravel's providers boot:
-
-**Go** — a panel, its resources and plugins:
-
-```go
-p := mks.New(mks.Options{
-    Path:       "/admin",
-    Orm:        facades.Orm(),
-    Validation: facades.Validation(),
-    Auth:       mks.AuthOptions{ /* guard, hash, new user, rate limiter */ },
-    Storage:    facades.Storage(),
-    UI:         uiFS, // the built client, embedded with go:embed
-})
-
-p.Register(myResource)                 // your panel.Define[models.Post](cfg)
-p.Use(&cms.Plugin{Orm: facades.Orm()}) // the first-party plugins you want
-p.Routes(facades.Route())
-```
-
-**TSX** — the client for those resources (see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)):
+## Quick start (UI)
 
 ```tsx
-import { Panel, defineResource } from '@mksine/mks'
+import { createRoot } from 'react-dom/client'
+import { Panel, defineResource, type ResourceDefinition } from '@mksine/mks'
 import { cms } from '@mksine/mks/cms'
 import '@mksine/mks/styles.css'
+
+interface Post {
+  id: number
+  title: string
+  status: 'draft' | 'published'
+}
+
+const posts: ResourceDefinition<Post> = defineResource<Post>({
+  name: 'posts',
+  label: 'Post',
+  pluralLabel: 'Posts',
+  form: (f) => [
+    f.textInput('title').required().maxLength(255),
+    f.select('status').options({ draft: 'Draft', published: 'Published' }),
+  ],
+  table: (t) => [t.text('title').searchable().sortable(), t.badge('status')],
+  actions: (a) => [a.edit(), a.delete().requiresConfirmation()],
+})
 
 createRoot(document.getElementById('root')!).render(
   <Panel basePath="/admin" brand="MKS" resources={[posts]} plugins={[cms()]} />,
 )
 ```
 
-**Tailwind** — import the package styles after Tailwind:
+The backend for the same resource is a Go definition (`mks.Define[models.Post](…)`) — the
+two halves are documented together in
+[the architecture guide](https://github.com/MiranSalehi/mks/blob/main/docs/ARCHITECTURE.md).
+
+## Subpaths
+
+| Import | What it is |
+|---|---|
+| `@mksine/mks` | the panel core: resources, forms, tables, actions, filters, widgets, protocol |
+| `@mksine/mks/access` | roles and permissions |
+| `@mksine/mks/activity` | activity log |
+| `@mksine/mks/appearance` | themes and appearance |
+| `@mksine/mks/cms` | the MKSine CMS: pages, posts, media, menus, builder, themes, SEO |
+| `@mksine/mks/navigation` | admin menu editor |
+| `@mksine/mks/system` | system health and background processes |
+| `@mksine/mks/translations` | panel translations |
+| `@mksine/mks/styles.css` | the panel stylesheet |
+
+## Tailwind
+
+Import the package stylesheet after Tailwind:
 
 ```css
 @import "tailwindcss";
 @import "@mksine/mks/styles.css";
 ```
 
-## Commands
-
-The Go module adds these artisan commands to your app (`mks` category):
-
-| Command | What it does |
-|---|---|
-| `mks:types` | Writes TypeScript types for the registered resources |
-| `mks:assets` | Copies the built frontend from `@mksine/mks` into the app (`--from`, `--to`, `--prune`) |
-| `mks:resource <Model> --model-import=...` | Generates starter Go config and a TSX resource from a model; `--model-import` is the import path of your own models package |
-| `mks:cms-media-copies` | Makes the smaller image copies the CMS uses (needs the cms plugin) |
-
-## Development
-
-```bash
-pnpm install
-pnpm typecheck
-pnpm test
-pnpm build            # tsup + tsc declarations for every package
-pnpm check:exports    # exports/entries/plugins agree (after build)
-pnpm pack:check       # what npm would publish
-go test -race ./... && go vet ./...
-```
-
 ## Documentation
 
-- [Architecture](docs/ARCHITECTURE.md) — how the two halves split, the resource API, permissions, plugins
-- [Protocol](docs/PROTOCOL.md) — the JSON contract every adapter implements
-- [Publishing](docs/PUBLISHING.md) — how a release is cut
-- [Changelog](CHANGELOG.md) — what changed, per release
+- [README — install, wiring and commands](https://github.com/MiranSalehi/mks#readme)
+- [Architecture — how the two halves split and the resource API](https://github.com/MiranSalehi/mks/blob/main/docs/ARCHITECTURE.md)
+- [Protocol — the JSON contract](https://github.com/MiranSalehi/mks/blob/main/docs/PROTOCOL.md)
+- [Publishing](https://github.com/MiranSalehi/mks/blob/main/docs/PUBLISHING.md)
+- [Changelog](https://github.com/MiranSalehi/mks/blob/main/CHANGELOG.md)
 
 ## Versioning
 
-The npm packages and the Go module are released together under `0.x` versions. The JSON
-protocol is still v0: minor releases may include breaking protocol or API changes, and
-they are listed in the changelog. Pin exact versions in production until `1.0`.
+The npm package and the Go module are released together under the same `0.x` version
+(Git tag `vX.Y.Z`). The JSON protocol is v0: minor releases may include breaking changes,
+and they are listed in the changelog. Pin exact versions in production until `1.0`.
 
-## Security
+## Contributing and security
 
-Please report vulnerabilities privately; see [SECURITY.md](SECURITY.md).
+- [Contributing](https://github.com/MiranSalehi/mks/blob/main/CONTRIBUTING.md)
+- [Security policy](https://github.com/MiranSalehi/mks/blob/main/SECURITY.md) — report
+  vulnerabilities privately, not in a public issue.
 
 ## License
 
-[MIT](LICENSE) © Miran Salehi. Third-party notices are in
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+MIT © [Miran Salehi](https://github.com/MiranSalehi)

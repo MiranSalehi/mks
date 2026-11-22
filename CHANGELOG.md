@@ -2,41 +2,16 @@
 
 Changes worth noting for each release are recorded here.
 
-## Unreleased
+## 0.1.1 — 2026-11-22
 
-### Fixed
+### Documentation
 
-- **The application boots without the panel.** `mks.ServiceProvider.Boot` no longer panics when the panel cannot be built (usually because `mks.UserBinding` is not bound yet): it logs the reason, keeps artisan commands working after `package:install`, and answers the panel path with `503` instead of taking every command down.
-- **The router fallback is optional.** `mks.fallback` / `Options.NoFallback` turn off the panel's catch-all, so an application with its own fallback (an SPA, a custom 404) can call `panel.ServeUI` from it; a router has one fallback and the last one wins, which silently broke the panel's client-side routes.
-- **Session is a declared dependency** in the provider's `Relationship()`, matching the session middleware the panel mounts.
-- **A protocol mismatch is visible.** The UI shows a banner when the server's protocol differs from its own instead of only writing to the console, and `mks:assets` warns when the Go module and `@mksine/mks` versions differ.
-
-### Added
-
-- `mks:assets` copies the application's built panel (default `admin/dist`) into `public/vendor/mks` (`--from`, `--to`, `--prune`), for apps that serve it with `os.DirFS` instead of `go:embed`.
-- `contracts/` is the conventional import path for `Plugin`, `Resource`, `User`, hooks and options.
-- `pnpm check:exports` (CI and release) fails when `exports`, `src/plugins` and the tsup entries drift; the tsup entries now live in `tsup.config.ts`.
-
-### Changed
-
-- The npm package moved to the `@mksine` scope: it is now `@mksine/mks` (the Go module
-  path is unchanged). It was never published under the old name.
-- The source is English-only: comments, server messages, default content, page
-  templates, theme text and UI defaults are translated. The Persian locale itself stays
-  (`src/locales/fa.ts`, the `persian` table in `i18n.go`, `tr({ fa, … })`, `L(fa, …)`,
-  `T(fa, …)`), because that is the translation data, not source text. Persian/Arabic
-  punctuation in input handling (digit conversion, `،` separators in CSV/regex parsing)
-  is kept for the same reason.
-- Jalali month and weekday names use Latin transliterations now, and the site's dates
-  and counters use Latin digits (the panel's fa messages still show Persian digits).
-- The repository is now the package: `git init` was reset to this directory, the old
-  multi-package history was dropped, and the Go module path became
-  `github.com/MiranSalehi/mks` (was `.../packages/mks`). The npm and Go releases share
-  the plain `vX.Y.Z` tag.
-- GitHub Actions CI and release workflows are back — at the repository root this time —
-  running the Go and UI checks on every push and tag.
-- The Go module is tidy: `golang.org/x/image` is a direct dependency.
-- The npm package exposes `types` at the top level and `./package.json`.
+- The README is rewritten for the npm page: what the package is, requirements, install for
+  both halves, a TSX quick start, the subpath table, Tailwind setup and links to the full
+  documentation.
+- `package.json` gains richer keywords, an author URL and a clearer description, so npm
+  search and the package sidebar show the project correctly.
+- The published tarball keeps shipping `README.md`, `CHANGELOG.md` and `LICENSE`.
 
 ## 0.1.0 — 2026-11-22
 
@@ -123,3 +98,39 @@ the npm package `@mksine/mks` ship from the same tree, at its root.
 - The "collapse the menu" button at the foot of the sidebar: the topbar button already does it, in both directions.
 - The users' unused second "work role" column (migration `20261121000023_drop_user_role`): since the access plugin, every permission comes from a user's roles, so the column only repeated them on the user form and had to be kept in step by hand. The form now has one roles field, and the users list shows those roles by name (`role_names`).
 - The GitHub Actions workflow (`.github/workflows/ci.yml`) was removed on the project owner's decision: CI is not needed for now, so every check runs locally. Its last hosted run had failed on the playground Go tests, which expect a `.env` and database the workflow did not provide.
+
+
+
+### Fixed
+
+- **The application boots without the panel.** `mks.ServiceProvider.Boot` no longer panics when the panel cannot be built (usually because `mks.UserBinding` is not bound yet): it logs the reason, keeps artisan commands working after `package:install`, and answers the panel path with `503` instead of taking every command down.
+- **The router fallback is optional.** `mks.fallback` / `Options.NoFallback` turn off the panel's catch-all, so an application with its own fallback (an SPA, a custom 404) can call `panel.ServeUI` from it; a router has one fallback and the last one wins, which silently broke the panel's client-side routes.
+- **Session is a declared dependency** in the provider's `Relationship()`, matching the session middleware the panel mounts.
+- **A protocol mismatch is visible.** The UI shows a banner when the server's protocol differs from its own instead of only writing to the console, and `mks:assets` warns when the Go module and `@mksine/mks` versions differ.
+
+### Added
+
+- `mks:assets` copies the application's built panel (default `admin/dist`) into `public/vendor/mks` (`--from`, `--to`, `--prune`), for apps that serve it with `os.DirFS` instead of `go:embed`.
+- `contracts/` is the conventional import path for `Plugin`, `Resource`, `User`, hooks and options.
+- `pnpm check:exports` (CI and release) fails when `exports`, `src/plugins` and the tsup entries drift; the tsup entries now live in `tsup.config.ts`.
+
+### Changed
+
+- The npm package moved to the `@mksine` scope: it is now `@mksine/mks` (the Go module
+  path is unchanged). It was never published under the old name.
+- The source is English-only: comments, server messages, default content, page
+  templates, theme text and UI defaults are translated. The Persian locale itself stays
+  (`src/locales/fa.ts`, the `persian` table in `i18n.go`, `tr({ fa, … })`, `L(fa, …)`,
+  `T(fa, …)`), because that is the translation data, not source text. Persian/Arabic
+  punctuation in input handling (digit conversion, `،` separators in CSV/regex parsing)
+  is kept for the same reason.
+- Jalali month and weekday names use Latin transliterations now, and the site's dates
+  and counters use Latin digits (the panel's fa messages still show Persian digits).
+- The repository is now the package: `git init` was reset to this directory, the old
+  multi-package history was dropped, and the Go module path became
+  `github.com/MiranSalehi/mks` (was `.../packages/mks`). The npm and Go releases share
+  the plain `vX.Y.Z` tag.
+- GitHub Actions CI and release workflows are back — at the repository root this time —
+  running the Go and UI checks on every push and tag.
+- The Go module is tidy: `golang.org/x/image` is a direct dependency.
+- The npm package exposes `types` at the top level and `./package.json`.
