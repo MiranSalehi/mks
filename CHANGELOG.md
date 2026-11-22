@@ -2,6 +2,24 @@
 
 Changes worth noting for each release are recorded here.
 
+## 0.1.2 — 2026-11-23
+
+### Added
+
+- `mks:doctor` checks a real installation: the user binding, the built UI, the panel guard
+  and its defaults, the core table and the npm version, with the fix for each failure.
+- The service provider warns at boot when the panel guard is missing or is not a session
+  guard, and when the application's default guard is JWT without a secret (which fails
+  every panel request with an empty 500).
+- `mks.Config.Hashed` hashes fields with the application's hash service before insert and
+  update (e.g. `Hashed: []string{"password"}`), replacing the Before hook boilerplate.
+
+### Documentation
+
+- `docs/INSTALL.md` is the complete installation guide for a fresh Goravel application:
+  the guard, the user model and migration, the application provider, the Vite frontend,
+  `mks:assets`, migrations, `mks:doctor` and a troubleshooting table.
+
 ## 0.1.1 — 2026-11-22
 
 ### Documentation

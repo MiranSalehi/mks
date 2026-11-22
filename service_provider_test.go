@@ -24,6 +24,10 @@ func TestBootWithoutUserBindingKeepsTheAppBootable(t *testing.T) {
 	logger := mockslog.NewLog(t)
 
 	config.On("GetString", "mks.path", "/admin").Return("/admin")
+	config.On("GetString", "mks.auth.guard", "admin").Return("admin")
+	config.On("GetString", "auth.guards.admin.driver").Return("session")
+	config.On("GetString", "auth.guards.admin.provider").Return("user")
+	config.On("GetString", "auth.defaults.guard").Return("admin")
 	app.On("Singleton", Binding, mock.Anything).Return()
 	app.On("MakeConfig").Return(config)
 	app.On("MakeRoute").Return(router)

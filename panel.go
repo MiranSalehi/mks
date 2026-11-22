@@ -528,6 +528,9 @@ func (p *Panel) createRecord(ctx http.Context, r Resource, c Config, hc *HookCon
 			return nil, p.hookError(ctx, err)
 		}
 	}
+	if err := p.hashFields(c, data); err != nil {
+		return nil, p.serverError(ctx, err)
+	}
 
 	syncs, err := p.takeSyncs(r, c, data)
 	if err != nil {
@@ -615,6 +618,9 @@ func (p *Panel) update(ctx http.Context) http.Response {
 		if err := h.beforeUpdate(hc, model, data); err != nil {
 			return p.hookError(ctx, err)
 		}
+	}
+	if err := p.hashFields(c, data); err != nil {
+		return p.serverError(ctx, err)
 	}
 
 	syncs, err := p.takeSyncs(r, c, data)

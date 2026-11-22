@@ -64,9 +64,10 @@ pnpm add react react-dom @tanstack/react-query @tanstack/react-router @tanstack/
 ```
 
 This registers `mks.ServiceProvider`, publishes `config/mks.go` and installs the core
-notifications migration. Then bind the application pieces the panel cannot know (the user
-model, the built UI and the resources) in a service provider — see
-[Wiring](https://github.com/MiranSalehi/mks#wiring-the-two-halves).
+notifications migration. Then bind the application pieces the panel cannot know (the admin
+guard, the user model, the built UI and the resources) — the complete walkthrough, with the
+exact files and a troubleshooting table, is in
+[Installing MKS](https://github.com/MiranSalehi/mks/blob/main/docs/INSTALL.md).
 
 ## Quick start (UI)
 
@@ -128,6 +129,7 @@ Import the package stylesheet after Tailwind:
 
 ## Documentation
 
+- [Installing MKS — the complete setup for a Goravel app](https://github.com/MiranSalehi/mks/blob/main/docs/INSTALL.md)
 - [README — install, wiring and commands](https://github.com/MiranSalehi/mks#readme)
 - [Architecture — how the two halves split and the resource API](https://github.com/MiranSalehi/mks/blob/main/docs/ARCHITECTURE.md)
 - [Protocol — the JSON contract](https://github.com/MiranSalehi/mks/blob/main/docs/PROTOCOL.md)

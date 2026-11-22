@@ -1,6 +1,6 @@
 {
   "name": "@mksine/mks",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "type": "module",
   "description": "MKS admin panel for Goravel: Filament-style resources, forms, tables, actions and policies, plus the MKSine CMS (pages, posts, media, menus, page builder, themes, plugins, SEO). React 19 + TypeScript UI over a JSON protocol.",

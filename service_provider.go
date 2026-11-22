@@ -98,9 +98,17 @@ func (*ServiceProvider) Boot(app foundation.Application) {
 	router := app.MakeRoute()
 	path := normalizePath(config.GetString("mks.path", "/admin"))
 
-	// mks:assets does not need the panel, so it stays available while the application is
-	// still being wired (the UI is what the user binds the panel to).
-	app.Commands([]console.Command{AssetsCommand()})
+	// Commands that work before the panel does, so a half-wired application can still
+	// build its assets and find out what is missing.
+	app.Commands([]console.Command{AssetsCommand(), DoctorCommand(app)})
+
+	// A broken default guard takes the whole panel down (Goravel builds it on every
+	// request), so say so at boot instead of returning an empty 500 later.
+	for _, warning := range authWarnings(config) {
+		if log := app.MakeLog(); log != nil {
+			log.Warning(warning)
+		}
+	}
 
 	instance, err := app.Make(Binding)
 	if err != nil {

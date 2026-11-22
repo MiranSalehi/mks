@@ -43,6 +43,10 @@ type Config struct {
 	// HTML lists rich-text fields; their HTML is sanitized on save (scripts, event handlers
 	// and other unsafe markup removed).
 	HTML []string
+	// Hashed lists fields whose plain value is hashed with the application's hash service
+	// before insert and update, e.g. "password". Empty values are skipped, so an edit can
+	// omit the field. Do not hash the same field in a Before hook when using this.
+	Hashed []string
 	// Deletable allows deleting records: DELETE /records/{id} and the bulk "delete" action.
 	Deletable bool
 	// Summaries allows aggregates over all filtered records, shown under the table:
@@ -119,6 +123,7 @@ func (c *Config) validate() error {
 	}
 	cols := append([]string{c.Key}, c.Searchable...)
 	cols = append(cols, c.HTML...)
+	cols = append(cols, c.Hashed...)
 	for field := range c.Uploads {
 		cols = append(cols, field)
 		if !contains(c.Fillable, field) {
