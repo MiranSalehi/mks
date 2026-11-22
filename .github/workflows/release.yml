@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  npm:
+    name: Publish @mks/mks
+    runs-on: ubuntu-latest
+    # Configure this environment (or use npm trusted publishing) before the first release.
+    environment: npm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.21.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm check:exports
+      - run: pnpm publish --access public --provenance --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

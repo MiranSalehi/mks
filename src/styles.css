@@ -1,0 +1,862 @@
+/* Panel theme. Import after "tailwindcss" in the app stylesheet. */
+@import "@fontsource-variable/vazirmatn";
+
+@source "./";
+
+@theme {
+  --font-sans: "Vazirmatn Variable", Vazirmatn, Tahoma, ui-sans-serif, system-ui, sans-serif;
+
+  /* Iris: the panel's own primary color (an app can override the whole scale). */
+  --color-primary-50: oklch(0.972 0.016 282);
+  --color-primary-100: oklch(0.943 0.033 282);
+  --color-primary-200: oklch(0.887 0.065 282);
+  --color-primary-300: oklch(0.806 0.111 280);
+  --color-primary-400: oklch(0.708 0.165 278);
+  --color-primary-500: oklch(0.623 0.205 276);
+  --color-primary-600: oklch(0.552 0.228 275);
+  --color-primary-700: oklch(0.488 0.215 275);
+  --color-primary-800: oklch(0.414 0.18 276);
+  --color-primary-900: oklch(0.355 0.137 277);
+  --color-primary-950: oklch(0.262 0.095 278);
+
+  /* Status colors: full scales from Tailwind's palette. */
+  --color-success-50: var(--color-emerald-50);
+  --color-success-100: var(--color-emerald-100);
+  --color-success-200: var(--color-emerald-200);
+  --color-success-300: var(--color-emerald-300);
+  --color-success-400: var(--color-emerald-400);
+  --color-success-500: var(--color-emerald-500);
+  --color-success-600: var(--color-emerald-600);
+  --color-success-700: var(--color-emerald-700);
+  --color-success-800: var(--color-emerald-800);
+  --color-success-900: var(--color-emerald-900);
+  --color-success-950: var(--color-emerald-950);
+
+  --color-warning-50: var(--color-amber-50);
+  --color-warning-100: var(--color-amber-100);
+  --color-warning-200: var(--color-amber-200);
+  --color-warning-300: var(--color-amber-300);
+  --color-warning-400: var(--color-amber-400);
+  --color-warning-500: var(--color-amber-500);
+  --color-warning-600: var(--color-amber-600);
+  --color-warning-700: var(--color-amber-700);
+  --color-warning-800: var(--color-amber-800);
+  --color-warning-900: var(--color-amber-900);
+  --color-warning-950: var(--color-amber-950);
+
+  --color-danger-50: var(--color-rose-50);
+  --color-danger-100: var(--color-rose-100);
+  --color-danger-200: var(--color-rose-200);
+  --color-danger-300: var(--color-rose-300);
+  --color-danger-400: var(--color-rose-400);
+  --color-danger-500: var(--color-rose-500);
+  --color-danger-600: var(--color-rose-600);
+  --color-danger-700: var(--color-rose-700);
+  --color-danger-800: var(--color-rose-800);
+  --color-danger-900: var(--color-rose-900);
+  --color-danger-950: var(--color-rose-950);
+
+  --color-info-50: var(--color-sky-50);
+  --color-info-100: var(--color-sky-100);
+  --color-info-200: var(--color-sky-200);
+  --color-info-300: var(--color-sky-300);
+  --color-info-400: var(--color-sky-400);
+  --color-info-500: var(--color-sky-500);
+  --color-info-600: var(--color-sky-600);
+  --color-info-700: var(--color-sky-700);
+  --color-info-800: var(--color-sky-800);
+  --color-info-900: var(--color-sky-900);
+  --color-info-950: var(--color-sky-950);
+
+  /* Softer corners and layered shadows for every component at once. */
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+  --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.05);
+  --shadow-md: 0 2px 4px -1px rgb(15 23 42 / 0.05), 0 6px 16px -4px rgb(15 23 42 / 0.08);
+  --shadow-lg: 0 4px 8px -2px rgb(15 23 42 / 0.06), 0 16px 32px -8px rgb(15 23 42 / 0.14);
+  --shadow-xl: 0 8px 16px -4px rgb(15 23 42 / 0.08), 0 32px 64px -16px rgb(15 23 42 / 0.25);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-pop: pop 160ms var(--ease-out-soft);
+  --animate-page: page 280ms var(--ease-out-soft);
+  --animate-toast: toast 320ms var(--ease-out-soft);
+
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.98);
+    }
+  }
+  @keyframes page {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+  @keyframes toast {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.96);
+    }
+  }
+}
+
+/* Dark mode follows the .dark class on <html>, set by useTheme(). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+html {
+  background: var(--color-gray-50);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html.dark {
+  color-scheme: dark;
+  background: var(--color-gray-950);
+}
+
+@layer base {
+  /* Everything that can be clicked shows the hand cursor; disabled things say so. */
+  a[href],
+  button:not(:disabled):not([aria-disabled="true"]),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"],
+  [role="option"],
+  [role="menuitem"],
+  summary,
+  select:not(:disabled),
+  label:has(> input[type="checkbox"]:not(:disabled)),
+  label:has(> input[type="radio"]:not(:disabled)),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="file"]:not(:disabled) {
+    cursor: pointer;
+  }
+  :disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  /* Gentle state changes everywhere; utilities can still set their own. */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  [role="tab"],
+  [role="option"],
+  [role="menuitem"] {
+    transition-property: color, background-color, border-color, outline-color, box-shadow, opacity, transform;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out-soft);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+  }
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [contenteditable]:focus-visible {
+    outline: none;
+  }
+
+  ::selection {
+    background: color-mix(in oklch, var(--color-primary-500) 25%, transparent);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--color-gray-500) 35%, transparent) transparent;
+  }
+}
+
+/*
+ * Native selects get the panel's own arrow, with room on the inline end (left in RTL).
+ * Unlayered on purpose: it must win over padding utilities like px-3.
+ */
+select:not([multiple]):not([size]) {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236b7280' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 1.1rem;
+  background-position: right 0.6rem center;
+  padding-inline-end: 2.25rem;
+}
+[dir="rtl"] select:not([multiple]):not([size]) {
+  background-position: left 0.6rem center;
+}
+.dark select:not([multiple]):not([size]) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%239ca3af' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+}
+
+/*
+ * Dialogs fade and rise in, and out again (the element stays in the top layer while it
+ * closes thanks to allow-discrete). See Modal.tsx.
+ */
+dialog.mks-dialog {
+  opacity: 0;
+  transform: translateY(12px) scale(0.97);
+  transition:
+    opacity 200ms var(--ease-out-soft),
+    transform 240ms var(--ease-out-soft),
+    overlay 240ms allow-discrete,
+    display 240ms allow-discrete;
+}
+dialog.mks-dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+@starting-style {
+  dialog.mks-dialog[open] {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+}
+dialog.mks-dialog::backdrop {
+  background: rgb(15 23 42 / 0);
+  backdrop-filter: blur(0);
+  transition:
+    background 240ms var(--ease-out-soft),
+    backdrop-filter 240ms var(--ease-out-soft),
+    overlay 240ms allow-discrete,
+    display 240ms allow-discrete;
+}
+dialog.mks-dialog[open]::backdrop {
+  background: rgb(15 23 42 / 0.45);
+  backdrop-filter: blur(4px);
+}
+@starting-style {
+  dialog.mks-dialog[open]::backdrop {
+    background: rgb(15 23 42 / 0);
+    backdrop-filter: blur(0);
+  }
+}
+
+/*
+ * A drawer: a dialog that slides in from the inline end (the left in RTL) and back out.
+ */
+dialog.mks-drawer {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  margin: 0;
+  height: 100dvh;
+  max-height: none;
+  width: min(26rem, 100vw);
+  max-width: 100vw;
+  transform: translateX(100%);
+  transition:
+    transform 320ms var(--ease-out-soft),
+    overlay 320ms allow-discrete,
+    display 320ms allow-discrete;
+}
+[dir="rtl"] dialog.mks-drawer {
+  transform: translateX(-100%);
+}
+dialog.mks-drawer[open] {
+  transform: none;
+}
+@starting-style {
+  dialog.mks-drawer[open] {
+    transform: translateX(100%);
+  }
+  [dir="rtl"] dialog.mks-drawer[open] {
+    transform: translateX(-100%);
+  }
+}
+dialog.mks-drawer::backdrop {
+  background: rgb(15 23 42 / 0);
+  backdrop-filter: blur(0);
+  transition:
+    background 320ms var(--ease-out-soft),
+    backdrop-filter 320ms var(--ease-out-soft),
+    overlay 320ms allow-discrete,
+    display 320ms allow-discrete;
+}
+dialog.mks-drawer[open]::backdrop {
+  background: rgb(15 23 42 / 0.35);
+  backdrop-filter: blur(2px);
+}
+@starting-style {
+  dialog.mks-drawer[open]::backdrop {
+    background: rgb(15 23 42 / 0);
+    backdrop-filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  dialog.mks-dialog,
+  dialog.mks-dialog::backdrop,
+  dialog.mks-drawer,
+  dialog.mks-drawer::backdrop {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+/* Rich editor content (no typography plugin needed). Logical properties work in RTL. */
+.mks-prose > * + * {
+  margin-top: 0.75em;
+}
+.mks-prose h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.mks-prose h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.mks-prose ul {
+  list-style: disc;
+  padding-inline-start: 1.5rem;
+}
+.mks-prose ol {
+  list-style: decimal;
+  padding-inline-start: 1.5rem;
+}
+.mks-prose blockquote {
+  border-inline-start: 3px solid var(--color-gray-300);
+  padding-inline-start: 1rem;
+  color: var(--color-gray-600);
+}
+.mks-prose a {
+  color: var(--color-primary-600);
+  text-decoration: underline;
+}
+.mks-prose pre {
+  direction: ltr;
+  text-align: left;
+  background: var(--color-gray-100);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+}
+.dark .mks-prose pre {
+  background: rgb(255 255 255 / 0.05);
+}
+.dark .mks-prose blockquote {
+  border-color: var(--color-gray-600);
+  color: var(--color-gray-400);
+}
+
+/* Rich editor content beyond the basics: what MKSine's CKEditor toolbar can write. */
+.mks-prose h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.mks-prose h4 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.mks-prose h5,
+.mks-prose h6 {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.mks-prose table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+.mks-prose td,
+.mks-prose th {
+  border: 1px solid var(--color-gray-300);
+  padding: 0.4em 0.6em;
+  min-width: 2em;
+  vertical-align: top;
+  position: relative;
+}
+.mks-prose th {
+  background: var(--color-gray-100);
+  font-weight: 600;
+}
+.dark .mks-prose td,
+.dark .mks-prose th {
+  border-color: rgb(255 255 255 / 0.2);
+}
+.dark .mks-prose th {
+  background: rgb(255 255 255 / 0.06);
+}
+.mks-prose .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklab, var(--color-primary-500) 15%, transparent);
+  pointer-events: none;
+}
+.mks-prose img,
+.mks-prose video,
+.mks-prose audio {
+  max-width: 100%;
+  height: auto;
+}
+.mks-prose img.ProseMirror-selectednode,
+.mks-prose video.ProseMirror-selectednode {
+  outline: 3px solid var(--color-primary-500);
+}
+.mks-prose ul[data-type='taskList'] {
+  list-style: none;
+  padding-inline-start: 0.25rem;
+}
+.mks-prose ul[data-type='taskList'] li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+.mks-prose ul[data-type='taskList'] li > div {
+  flex: 1;
+}
+.mks-prose mark {
+  border-radius: 2px;
+  padding: 0 1px;
+  color: inherit;
+}
+.mks-prose mark.marker-yellow { background: #fdfd77; }
+.mks-prose mark.marker-green { background: #62f962; }
+.mks-prose mark.marker-pink { background: #fc7899; }
+.mks-prose mark.marker-blue { background: #72ccfd; }
+.mks-prose mark.pen-red { background: transparent; color: #e71313; }
+.mks-prose mark.pen-green { background: transparent; color: #128a00; }
+.mks-prose .category {
+  color: var(--color-gray-500);
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.mks-prose .document-title {
+  font-size: 1.75em;
+  font-weight: 800;
+}
+.mks-prose .document-subtitle {
+  color: var(--color-gray-500);
+  font-weight: 400;
+}
+.mks-prose .info-box {
+  border: 1px solid #e91e63;
+  border-radius: 10px;
+  background: color-mix(in oklab, #e91e63 7%, transparent);
+  padding: 1em 1.25em;
+}
+.mks-prose .side-quote {
+  float: inline-end;
+  width: 40%;
+  margin-inline-start: 1.25em;
+  border-inline-start: 0;
+  border-radius: 8px;
+  background: #ebf8fd;
+  color: var(--color-gray-800);
+  padding: 1em 1.25em;
+  font-family: Georgia, serif;
+}
+.mks-prose span.marker { background: yellow; }
+.mks-prose span.spoiler {
+  background: #000;
+  color: #000;
+}
+.mks-prose span.spoiler:hover { color: #fff; }
+.mks-prose pre.fancy-code {
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.2);
+}
+.mks-prose pre.fancy-code-dark { background: #272822; color: #fff; }
+.mks-prose pre.fancy-code-bright { background: #dddfe0; color: #000; }
+
+/* The editing area: placeholder, and CKEditor's "Show blocks" outlines. */
+.mks-rte-content p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: inline-start;
+  height: 0;
+  pointer-events: none;
+  color: var(--color-gray-400);
+}
+.mks-show-blocks .mks-rte-content :is(p, h1, h2, h3, h4, h5, h6, blockquote, pre, ul, ol, table, li) {
+  outline: 1px dashed var(--color-gray-400);
+  outline-offset: 1px;
+}
+.mks-show-blocks .mks-rte-content :is(p, h1, h2, h3, h4, h5, h6, blockquote, pre, ul, ol) {
+  position: relative;
+  padding-top: 15px;
+}
+.mks-show-blocks .mks-rte-content :is(p, h1, h2, h3, h4, h5, h6, blockquote, pre, ul, ol)::after {
+  position: absolute;
+  top: 1px;
+  inset-inline-start: 2px;
+  font: 600 9px/1 ui-sans-serif, system-ui, sans-serif;
+  color: var(--color-gray-500);
+  pointer-events: none;
+}
+.mks-show-blocks .mks-rte-content p::after { content: 'P'; }
+.mks-show-blocks .mks-rte-content h1::after { content: 'H1'; }
+.mks-show-blocks .mks-rte-content h2::after { content: 'H2'; }
+.mks-show-blocks .mks-rte-content h3::after { content: 'H3'; }
+.mks-show-blocks .mks-rte-content h4::after { content: 'H4'; }
+.mks-show-blocks .mks-rte-content h5::after { content: 'H5'; }
+.mks-show-blocks .mks-rte-content h6::after { content: 'H6'; }
+.mks-show-blocks .mks-rte-content blockquote::after { content: 'BLOCKQUOTE'; }
+.mks-show-blocks .mks-rte-content pre::after { content: 'PRE'; }
+.mks-show-blocks .mks-rte-content ul::after { content: 'UL'; }
+.mks-show-blocks .mks-rte-content ol::after { content: 'OL'; }
+
+/* The panel's look (appearance.ts): the primary color, corners, font size and density. */
+:root[data-primary=indigo] {
+  --color-primary-50: var(--color-indigo-50);
+  --color-primary-100: var(--color-indigo-100);
+  --color-primary-200: var(--color-indigo-200);
+  --color-primary-300: var(--color-indigo-300);
+  --color-primary-400: var(--color-indigo-400);
+  --color-primary-500: var(--color-indigo-500);
+  --color-primary-600: var(--color-indigo-600);
+  --color-primary-700: var(--color-indigo-700);
+  --color-primary-800: var(--color-indigo-800);
+  --color-primary-900: var(--color-indigo-900);
+  --color-primary-950: var(--color-indigo-950);
+}
+:root[data-primary=blue] {
+  --color-primary-50: var(--color-blue-50);
+  --color-primary-100: var(--color-blue-100);
+  --color-primary-200: var(--color-blue-200);
+  --color-primary-300: var(--color-blue-300);
+  --color-primary-400: var(--color-blue-400);
+  --color-primary-500: var(--color-blue-500);
+  --color-primary-600: var(--color-blue-600);
+  --color-primary-700: var(--color-blue-700);
+  --color-primary-800: var(--color-blue-800);
+  --color-primary-900: var(--color-blue-900);
+  --color-primary-950: var(--color-blue-950);
+}
+:root[data-primary=cyan] {
+  --color-primary-50: var(--color-cyan-50);
+  --color-primary-100: var(--color-cyan-100);
+  --color-primary-200: var(--color-cyan-200);
+  --color-primary-300: var(--color-cyan-300);
+  --color-primary-400: var(--color-cyan-400);
+  --color-primary-500: var(--color-cyan-500);
+  --color-primary-600: var(--color-cyan-600);
+  --color-primary-700: var(--color-cyan-700);
+  --color-primary-800: var(--color-cyan-800);
+  --color-primary-900: var(--color-cyan-900);
+  --color-primary-950: var(--color-cyan-950);
+}
+:root[data-primary=emerald] {
+  --color-primary-50: var(--color-emerald-50);
+  --color-primary-100: var(--color-emerald-100);
+  --color-primary-200: var(--color-emerald-200);
+  --color-primary-300: var(--color-emerald-300);
+  --color-primary-400: var(--color-emerald-400);
+  --color-primary-500: var(--color-emerald-500);
+  --color-primary-600: var(--color-emerald-600);
+  --color-primary-700: var(--color-emerald-700);
+  --color-primary-800: var(--color-emerald-800);
+  --color-primary-900: var(--color-emerald-900);
+  --color-primary-950: var(--color-emerald-950);
+}
+:root[data-primary=violet] {
+  --color-primary-50: var(--color-violet-50);
+  --color-primary-100: var(--color-violet-100);
+  --color-primary-200: var(--color-violet-200);
+  --color-primary-300: var(--color-violet-300);
+  --color-primary-400: var(--color-violet-400);
+  --color-primary-500: var(--color-violet-500);
+  --color-primary-600: var(--color-violet-600);
+  --color-primary-700: var(--color-violet-700);
+  --color-primary-800: var(--color-violet-800);
+  --color-primary-900: var(--color-violet-900);
+  --color-primary-950: var(--color-violet-950);
+}
+:root[data-primary=orange] {
+  --color-primary-50: var(--color-orange-50);
+  --color-primary-100: var(--color-orange-100);
+  --color-primary-200: var(--color-orange-200);
+  --color-primary-300: var(--color-orange-300);
+  --color-primary-400: var(--color-orange-400);
+  --color-primary-500: var(--color-orange-500);
+  --color-primary-600: var(--color-orange-600);
+  --color-primary-700: var(--color-orange-700);
+  --color-primary-800: var(--color-orange-800);
+  --color-primary-900: var(--color-orange-900);
+  --color-primary-950: var(--color-orange-950);
+}
+:root[data-primary=fuchsia] {
+  --color-primary-50: var(--color-fuchsia-50);
+  --color-primary-100: var(--color-fuchsia-100);
+  --color-primary-200: var(--color-fuchsia-200);
+  --color-primary-300: var(--color-fuchsia-300);
+  --color-primary-400: var(--color-fuchsia-400);
+  --color-primary-500: var(--color-fuchsia-500);
+  --color-primary-600: var(--color-fuchsia-600);
+  --color-primary-700: var(--color-fuchsia-700);
+  --color-primary-800: var(--color-fuchsia-800);
+  --color-primary-900: var(--color-fuchsia-900);
+  --color-primary-950: var(--color-fuchsia-950);
+}
+:root[data-primary=slate] {
+  --color-primary-50: var(--color-slate-50);
+  --color-primary-100: var(--color-slate-100);
+  --color-primary-200: var(--color-slate-200);
+  --color-primary-300: var(--color-slate-300);
+  --color-primary-400: var(--color-slate-400);
+  --color-primary-500: var(--color-slate-500);
+  --color-primary-600: var(--color-slate-600);
+  --color-primary-700: var(--color-slate-700);
+  --color-primary-800: var(--color-slate-800);
+  --color-primary-900: var(--color-slate-900);
+  --color-primary-950: var(--color-slate-950);
+}
+:root[data-radius=sharp] {
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.3rem;
+  --radius-xl: 0.375rem;
+  --radius-2xl: 0.5rem;
+}
+:root[data-radius=round] {
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.125rem;
+  --radius-2xl: 1.5rem;
+}
+:root[data-font=small] {
+  font-size: 93.75%;
+}
+:root[data-font=large] {
+  font-size: 106.25%;
+}
+:root[data-density=compact] {
+  --spacing: 0.21rem;
+}
+/* The brand sidebar: the primary color, drawn in dark mode. */
+.mks-rail-brand {
+  background: var(--color-primary-950) !important;
+}
+/* The dark sidebar is opaque: its glass tint only works over a dark page, so on a light
+   page (the classic preset in light mode) it would wash the labels out. */
+.mks-rail-dark {
+  background: var(--color-gray-900) !important;
+}
+
+/* Form fields of the look: filled, underline and floating labels; labels beside fields. */
+:root[data-field=filled] .mks-field .mks-input {
+  background: var(--color-gray-100);
+  --tw-ring-color: transparent;
+  box-shadow: none;
+}
+:root[data-field=filled] .mks-field .mks-input:focus,
+:root[data-field=filled] .mks-field .mks-input:focus-within {
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--color-primary-500);
+}
+.dark:root[data-field=filled] .mks-field .mks-input {
+  background: rgb(255 255 255 / 0.07);
+}
+.dark:root[data-field=filled] .mks-field .mks-input:focus,
+.dark:root[data-field=filled] .mks-field .mks-input:focus-within {
+  background: rgb(255 255 255 / 0.04);
+}
+:root[data-field=underline] .mks-field .mks-input {
+  border-radius: 0;
+  background: transparent;
+  padding-inline: 0.125rem;
+  box-shadow: inset 0 -1px 0 var(--color-gray-300);
+}
+:root[data-field=underline] .mks-field .mks-input:focus,
+:root[data-field=underline] .mks-field .mks-input:focus-within {
+  box-shadow: inset 0 -2px 0 var(--color-primary-500);
+}
+.dark:root[data-field=underline] .mks-field .mks-input {
+  box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.2);
+}
+/* Floating: the label sits on the field's top edge. */
+:root[data-field=floating] .mks-field:has(> .mks-input, > div > .mks-input, > .relative > .mks-input) {
+  position: relative;
+  padding-top: 0.25rem;
+}
+:root[data-field=floating] .mks-field:has(> .mks-input, > div > .mks-input, > .relative > .mks-input) > .mks-label {
+  position: absolute;
+  top: -0.3rem;
+  inset-inline-start: 0.625rem;
+  z-index: 1;
+  padding-inline: 0.3rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--color-gray-600);
+  background: var(--mks-field-bg, #fff);
+  border-radius: 0.25rem;
+}
+.dark:root[data-field=floating] .mks-field > .mks-label {
+  --mks-field-bg: var(--color-gray-900);
+  color: var(--color-gray-300);
+}
+:root[data-field=floating] .mks-field .mks-input {
+  padding-top: 0.65rem;
+}
+/* Side labels on wide screens. */
+@media (min-width: 640px) {
+  :root[data-label=side] .mks-field {
+    display: grid;
+    grid-template-columns: minmax(7rem, 30%) minmax(0, 1fr);
+    column-gap: 1rem;
+    align-items: start;
+  }
+  :root[data-label=side] .mks-field > * {
+    grid-column: 2;
+  }
+  :root[data-label=side] .mks-field > .mks-label {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    padding-top: 0.5rem;
+  }
+  :root[data-label=side] .mks-field > :not(.mks-label) {
+    margin-top: 0;
+  }
+  :root[data-label=side] .mks-field > :not(.mks-label) + :not(.mks-label) {
+    margin-top: 0.5rem;
+  }
+}
+
+/* The code editor (CSS and JavaScript fields): syntax colors follow light/dark. */
+.mks-code-editor {
+  --mks-code-comment: #64748b;
+  --mks-code-keyword: #7c3aed;
+  --mks-code-string: #047857;
+  --mks-code-number: #b45309;
+  --mks-code-property: #1d4ed8;
+  --mks-code-variable: #0f172a;
+  --mks-code-type: #0e7490;
+  --mks-code-function: #c2410c;
+  --mks-code-punctuation: #475569;
+  --mks-code-gutter: #94a3b8;
+  --mks-code-active-line: rgb(15 23 42 / 0.04);
+  --mks-code-selection: rgb(59 130 246 / 0.18);
+}
+.dark .mks-code-editor {
+  --mks-code-comment: #94a3b8;
+  --mks-code-keyword: #c4b5fd;
+  --mks-code-string: #6ee7b7;
+  --mks-code-number: #fbbf24;
+  --mks-code-property: #93c5fd;
+  --mks-code-variable: #e2e8f0;
+  --mks-code-type: #67e8f9;
+  --mks-code-function: #fdba74;
+  --mks-code-punctuation: #cbd5e1;
+  --mks-code-gutter: #64748b;
+  --mks-code-active-line: rgb(255 255 255 / 0.04);
+  --mks-code-selection: rgb(96 165 250 / 0.25);
+}
+
+/* Checkboxes and radios: one custom control everywhere (MKSine style). */
+.mks-check,
+.mks-radio {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  display: inline-grid;
+  place-content: center;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  border: 1.5px solid var(--color-gray-300);
+  background-color: #fff;
+  vertical-align: middle;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+.mks-check {
+  border-radius: 0.3rem;
+}
+.mks-radio {
+  border-radius: 9999px;
+}
+.dark .mks-check,
+.dark .mks-radio {
+  border-color: var(--color-gray-600);
+  background-color: rgb(255 255 255 / 0.04);
+}
+.mks-check:not(:disabled):not(:checked):not(:indeterminate):hover,
+.mks-radio:not(:disabled):not(:checked):hover {
+  border-color: var(--color-gray-400);
+}
+.dark .mks-check:not(:disabled):not(:checked):not(:indeterminate):hover,
+.dark .mks-radio:not(:disabled):not(:checked):hover {
+  border-color: var(--color-gray-500);
+}
+/* The tick. */
+.mks-check::before {
+  content: '';
+  width: 0.3rem;
+  height: 0.55rem;
+  margin-top: -0.1rem;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 120ms ease;
+}
+.mks-check:checked {
+  background-color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+}
+.mks-check:checked::before {
+  transform: rotate(45deg) scale(1);
+}
+/* The dash of "select all" when only some rows are selected. */
+.mks-check:indeterminate {
+  background-color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+}
+.mks-check:indeterminate::before {
+  width: 0.55rem;
+  height: 0;
+  margin: 0;
+  border-width: 0 0 2px;
+  transform: none;
+}
+/* The dot. */
+.mks-radio::before {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: #fff;
+  transform: scale(0);
+  transition: transform 120ms ease;
+}
+.mks-radio:checked {
+  background-color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+}
+.mks-radio:checked::before {
+  transform: scale(1);
+}
+.mks-check:focus-visible,
+.mks-radio:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+.mks-check:disabled,
+.mks-radio:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.mks-check[aria-invalid='true'],
+.mks-radio[aria-invalid='true'] {
+  border-color: var(--color-danger-600);
+}
+.dark .mks-check[aria-invalid='true'],
+.dark .mks-radio[aria-invalid='true'] {
+  border-color: var(--color-danger-400);
+}

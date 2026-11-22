@@ -1,0 +1,3 @@
+# tsup bundles with esbuild; allow its postinstall (it links the platform binary).
+allowBuilds:
+  esbuild: true
