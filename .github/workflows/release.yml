@@ -16,7 +16,7 @@ jobs:
     # Configure this environment (or use npm trusted publishing) before the first release.
     environment: npm
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
         with:
           version: 12.21.0
