@@ -302,7 +302,7 @@ function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
 
 // Each language named in itself; languages managers added come after the built-in ones.
 const BUILT_IN_LANGUAGES: { value: Locale; label: string }[] = [
-  { value: 'fa', label: 'فارسی' },
+  { value: 'fa', label: 'Persian' },
   { value: 'en', label: 'English' },
 ]
 

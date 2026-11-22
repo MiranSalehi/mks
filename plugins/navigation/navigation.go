@@ -123,9 +123,9 @@ func (pl *Plugin) Register(p *mks.Panel) {
 			if err := pl.save(pl.Orm.Query(), c); err != nil {
 				return nil, err
 			}
-			message := "منوی مدیریت ذخیره شد"
+			message := "Admin menu saved"
 			if action, _ := ctx.Data["action"].(string); action == "reset" {
-				message = "منوی مدیریت به حالت پیش‌فرض برگشت"
+				message = "The admin menu was reset to its default"
 			}
 			return mks.Success(message), nil
 		},
@@ -186,14 +186,14 @@ func (pl *Plugin) save(q orm.Query, c *Config) error {
 func parse(raw any) (*Config, error) {
 	encoded, err := json.Marshal(raw)
 	if err != nil {
-		return nil, errors.New("ساختار تنظیمات معتبر نیست.")
+		return nil, errors.New("Invalid settings structure.")
 	}
 	if len(encoded) > 8192 {
-		return nil, errors.New("تعداد تغییرات منو برای ذخیره زیاد است. چند آیتم را به پیش‌فرض برگردانید و دوباره امتحان کنید.")
+		return nil, errors.New("Too many menu changes to save. Reset a few items to the default and try again.")
 	}
 	c := &Config{}
 	if err := json.Unmarshal(encoded, c); err != nil {
-		return nil, errors.New("ساختار تنظیمات معتبر نیست.")
+		return nil, errors.New("Invalid settings structure.")
 	}
 	if c.Items == nil {
 		c.Items = map[string]Item{}
@@ -204,7 +204,7 @@ func parse(raw any) (*Config, error) {
 	for key, it := range c.Items {
 		it.Label, it.Group = strings.TrimSpace(it.Label), strings.TrimSpace(it.Group)
 		if utf8.RuneCountInString(it.Label) > 120 || utf8.RuneCountInString(it.Group) > 120 || len(key) > 120 {
-			return nil, fmt.Errorf("نام «%s» بیش از ۱۲۰ نویسه است.", key)
+			return nil, fmt.Errorf("The name \"%s\" is longer than 120 characters.", key)
 		}
 		if it.Hidden {
 			// The shape written before the editor had "placement".
@@ -233,7 +233,7 @@ func parse(raw any) (*Config, error) {
 	for key, g := range c.Groups {
 		g.Label = strings.TrimSpace(g.Label)
 		if utf8.RuneCountInString(g.Label) > 120 || len(key) > 120 {
-			return nil, fmt.Errorf("نام گروه «%s» بیش از ۱۲۰ نویسه است.", key)
+			return nil, fmt.Errorf("The group name \"%s\" is longer than 120 characters.", key)
 		}
 		if g == (Group{}) {
 			delete(c.Groups, key)

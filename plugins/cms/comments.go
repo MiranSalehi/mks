@@ -27,7 +27,7 @@ func (pl *Plugin) commentsResource() mks.ModelResource[Comment] {
 					ids = append(ids, c.ID)
 				}
 				if len(ids) == 0 {
-					return nil, mks.Reject("دیدگاهی انتخاب نشده است.")
+					return nil, mks.Reject("No comment selected.")
 				}
 				if _, err := ctx.Query.Model(&Comment{}).Where("site_id = ?", ctx.TenantID()).WhereIn("id", ids).Update("status", status); err != nil {
 					return nil, err
@@ -69,10 +69,10 @@ func (pl *Plugin) commentsResource() mks.ModelResource[Comment] {
 			Delete: moderate,
 		}).
 		Actions(
-			setStatus("approve", "approved", "%s دیدگاه تأیید شد."),
-			setStatus("spam", "spam", "%s دیدگاه هرزنامه شد."),
-			setStatus("trash", "trash", "%s دیدگاه به زباله‌دان رفت."),
-			setStatus("restore", "pending", "%s دیدگاه به حالت در انتظار برگشت."),
+			setStatus("approve", "approved", "%s comment(s) approved."),
+			setStatus("spam", "spam", "%s comment(s) marked as spam."),
+			setStatus("trash", "trash", "%s comment(s) moved to the trash."),
+			setStatus("restore", "pending", "%s comment(s) moved back to pending."),
 			mks.Action[Comment]{
 				Name:      "reply",
 				Authorize: moderate,
@@ -86,12 +86,12 @@ func (pl *Plugin) commentsResource() mks.ModelResource[Comment] {
 // target. Replies to replies attach to the root, since the site shows one level.
 func (pl *Plugin) replyToComment(ctx *mks.ActionContext[Comment]) (*mks.ActionResult, error) {
 	if len(ctx.Records) != 1 {
-		return nil, mks.Reject("برای پاسخ دقیقاً یک دیدگاه انتخاب کنید.")
+		return nil, mks.Reject("Select exactly one comment to reply to.")
 	}
 	parent := ctx.Records[0]
 	content := strings.TrimSpace(stringValue(ctx.Data["content"]))
 	if content == "" {
-		return nil, mks.ValidationErrors{"content": "متن پاسخ لازم است."}
+		return nil, mks.ValidationErrors{"content": "The reply text is required."}
 	}
 	rootID := parent.ID
 	if parent.ParentID != nil {
@@ -102,7 +102,7 @@ func (pl *Plugin) replyToComment(ctx *mks.ActionContext[Comment]) (*mks.ActionRe
 		name = ctx.User.PanelUser().Name
 	}
 	if name == "" {
-		name = "مدیر سایت"
+		name = "Site admin"
 	}
 	user := fmt.Sprint(ctx.UserID())
 	reply := Comment{SiteID: parent.SiteID, PostID: parent.PostID, PageID: parent.PageID, ParentID: &rootID,
@@ -114,7 +114,7 @@ func (pl *Plugin) replyToComment(ctx *mks.ActionContext[Comment]) (*mks.ActionRe
 	if err := ctx.Query.Create(&reply); err != nil {
 		return nil, err
 	}
-	r := mks.Success("پاسخ منتشر شد.")
+	r := mks.Success("Reply published.")
 	r.Invalidate = []string{"cms_comments"}
 	return r, nil
 }

@@ -263,7 +263,7 @@ function ChipText({ resource, filter, state }: { resource: string; filter: Filte
   if (filter instanceof SelectFilter) {
     const values = filter.values(state)
     if (filter._relationship) return <RelationChipText resource={resource} relation={filter._relationship} label={label} values={values} />
-    return <>{`${label}: ${values.map((v) => filter._options[v] ?? v).join('، ')}`}</>
+    return <>{`${label}: ${values.map((v) => filter._options[v] ?? v).join(', ')}`}</>
   }
   return <>{label}</>
 }
@@ -277,5 +277,5 @@ function RelationChipText({ resource, relation, label, values }: { resource: str
     staleTime: 60_000,
   })
   const names = values.map((v) => labels.data?.data.find((o) => String(o.value) === v)?.label ?? (labels.isPending ? '…' : v))
-  return <>{`${label}: ${names.join('، ')}`}</>
+  return <>{`${label}: ${names.join(', ')}`}</>
 }

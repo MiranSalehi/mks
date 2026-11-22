@@ -24,7 +24,7 @@ describe('infolist', () => {
   })
 
   it('builds sections, spans and conditions fluently', () => {
-    const s = i.section('وضعیت').aside().columns(1).description('d')
+    const s = i.section('Status').aside().columns(1).description('d')
     expect(s).toBeInstanceOf(InfoSection)
     expect([s._aside, s._columns, s._description]).toEqual([true, 1, 'd'])
     const date = i.date('title').columnSpan('full').visible((p) => p.status === 'published')

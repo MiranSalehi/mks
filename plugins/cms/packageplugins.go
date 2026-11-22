@@ -92,21 +92,21 @@ func checkFields(where string, fields []pkgField) error {
 	seen := map[string]bool{}
 	for _, f := range fields {
 		if !pkgNameRE.MatchString(f.Name) || seen[f.Name] {
-			return fmt.Errorf("%s: نام فیلد نامعتبر یا تکراری: %s", where, f.Name)
+			return fmt.Errorf("%s: invalid or duplicate field name: %s", where, f.Name)
 		}
 		seen[f.Name] = true
 		if _, ok := pkgKinds[f.Kind]; !ok {
-			return fmt.Errorf("%s: نوع فیلد %s شناخته نیست: %s", where, f.Name, f.Kind)
+			return fmt.Errorf("%s: unknown field type %s: %s", where, f.Name, f.Kind)
 		}
 		if f.Kind == "enum" && len(f.Options) == 0 {
-			return fmt.Errorf("%s: فیلد %s گزینه ندارد", where, f.Name)
+			return fmt.Errorf("%s: field %s has no options", where, f.Name)
 		}
 		if strings.TrimSpace(f.Label) == "" {
-			return fmt.Errorf("%s: فیلد %s برچسب ندارد", where, f.Name)
+			return fmt.Errorf("%s: field %s has no label", where, f.Name)
 		}
 		for _, p := range presentationFields {
 			if p.Name == f.Name {
-				return fmt.Errorf("%s: نام %s برای سبک بلوک‌ها رزرو است", where, f.Name)
+				return fmt.Errorf("%s: the name %s is reserved for block styles", where, f.Name)
 			}
 		}
 	}
@@ -117,7 +117,7 @@ func checkFields(where string, fields []pkgField) error {
 func checkPlugin(raw []byte, files map[string][]byte) (*pluginManifest, error) {
 	var m pluginManifest
 	if err := json.Unmarshal(raw, &m); err != nil {
-		return nil, fmt.Errorf("plugin.json معتبر نیست: %v", err)
+		return nil, fmt.Errorf("Invalid plugin.json: %v", err)
 	}
 	if err := m.check(files); err != nil {
 		return nil, err
@@ -125,7 +125,7 @@ func checkPlugin(raw []byte, files map[string][]byte) (*pluginManifest, error) {
 	tpl := func(where, file string) error {
 		body, ok := files[file]
 		if !ok {
-			return fmt.Errorf("%s: فایل %s پیدا نشد", where, file)
+			return fmt.Errorf("%s: file %s not found", where, file)
 		}
 		if _, err := template.New(file).Parse(string(body)); err != nil {
 			return fmt.Errorf("%s: %v", where, err)
@@ -135,28 +135,28 @@ func checkPlugin(raw []byte, files map[string][]byte) (*pluginManifest, error) {
 	seen := map[string]bool{}
 	for _, b := range m.Blocks {
 		if !pkgNameRE.MatchString(b.Type) || seen[b.Type] {
-			return nil, fmt.Errorf("نوع بلوک نامعتبر یا تکراری: %s", b.Type)
+			return nil, fmt.Errorf("Invalid or duplicate block type: %s", b.Type)
 		}
 		seen[b.Type] = true
 		if strings.TrimSpace(b.Label) == "" {
-			return nil, fmt.Errorf("بلوک %s برچسب ندارد", b.Type)
+			return nil, fmt.Errorf("Block %s has no label", b.Type)
 		}
 		if b.Category == "" {
 			b.Category = "content"
 		}
 		if !categories[b.Category] {
-			return nil, fmt.Errorf("دستهٔ بلوک %s نامعتبر است", b.Type)
+			return nil, fmt.Errorf("Invalid block category %s", b.Type)
 		}
-		if err := checkFields("بلوک "+b.Type, b.Fields); err != nil {
+		if err := checkFields("Block "+b.Type, b.Fields); err != nil {
 			return nil, err
 		}
-		if err := tpl("بلوک "+b.Type, b.Template); err != nil {
+		if err := tpl("Block "+b.Type, b.Template); err != nil {
 			return nil, err
 		}
 	}
 	for _, a := range m.Actions {
 		if !pkgHookRE.MatchString(a.Hook) {
-			return nil, fmt.Errorf("نام hook نامعتبر: %s", a.Hook)
+			return nil, fmt.Errorf("Invalid hook name: %s", a.Hook)
 		}
 		if err := tpl("hook "+a.Hook, a.Template); err != nil {
 			return nil, err
@@ -165,32 +165,32 @@ func checkPlugin(raw []byte, files map[string][]byte) (*pluginManifest, error) {
 	tags := map[string]bool{}
 	for _, s := range m.Shortcodes {
 		if !shortcodeName.MatchString(s.Tag) || tags[s.Tag] {
-			return nil, fmt.Errorf("کد کوتاه نامعتبر یا تکراری: %s", s.Tag)
+			return nil, fmt.Errorf("Invalid or duplicate code: %s", s.Tag)
 		}
 		tags[s.Tag] = true
-		if err := tpl("کد کوتاه "+s.Tag, s.Template); err != nil {
+		if err := tpl("Code "+s.Tag, s.Template); err != nil {
 			return nil, err
 		}
 	}
-	if err := checkFields("تنظیمات", m.Settings); err != nil {
+	if err := checkFields("Settings", m.Settings); err != nil {
 		return nil, err
 	}
 	keys := map[string]bool{}
 	for _, t := range m.ContentTypes {
 		if !contentTypeKey.MatchString(t.Key) || len(t.Key) > 40 || reservedContentTypes[t.Key] || keys[t.Key] {
-			return nil, fmt.Errorf("کلید نوع محتوا نامعتبر، رزروشده یا تکراری است: %s", t.Key)
+			return nil, fmt.Errorf("The content type key is invalid, reserved or duplicated: %s", t.Key)
 		}
 		keys[t.Key] = true
 		if strings.TrimSpace(t.Singular) == "" || strings.TrimSpace(t.Plural) == "" {
-			return nil, fmt.Errorf("نوع محتوای %s نام مفرد و جمع لازم دارد", t.Key)
+			return nil, fmt.Errorf("The %s content type needs singular and plural names", t.Key)
 		}
 		for _, uri := range []string{t.ArchiveURI, t.SingleURI} {
 			if uri != "" && !patternRE.MatchString(uri) {
-				return nil, fmt.Errorf("نشانی نوع محتوای %s نامعتبر است: %s", t.Key, uri)
+				return nil, fmt.Errorf("Invalid URL for the %s content type: %s", t.Key, uri)
 			}
 		}
 		if t.SingleURI != "" && !strings.Contains(t.SingleURI, "{slug}") {
-			return nil, fmt.Errorf("نشانی تکی نوع محتوای %s باید {slug} داشته باشد", t.Key)
+			return nil, fmt.Errorf("The %s content type's single URL must contain {slug}", t.Key)
 		}
 	}
 	return &m, nil
@@ -437,7 +437,7 @@ func checkPluginSetting(f pkgField, v string) (string, string) {
 	switch f.Kind {
 	case "bool":
 		if v != "" && v != "0" && v != "1" {
-			return "", "مقدار نامعتبر است."
+			return "", "Invalid value."
 		}
 	case "int":
 		if v == "" {
@@ -445,28 +445,28 @@ func checkPluginSetting(f pkgField, v string) (string, string) {
 		}
 		n, err := strconv.Atoi(v)
 		if err != nil || (f.Max != 0 || f.Min != 0) && (n < f.Min || n > f.Max) {
-			return "", "عدد معتبر نیست."
+			return "", "Invalid number."
 		}
 	case "enum":
 		if _, ok := f.Options[v]; v != "" && !ok {
-			return "", "گزینهٔ نامعتبر."
+			return "", "Invalid option."
 		}
 	case "url":
 		if v != "" && !SafeLinkURL(v) {
-			return "", "نشانی معتبر نیست."
+			return "", "Invalid URL."
 		}
 	case "color":
 		if v != "" && !colorRE.MatchString(v) {
-			return "", "رنگ معتبر نیست."
+			return "", "Invalid color."
 		}
 	case "html":
 		v = mks.SanitizeHTML(v)
 	}
 	if f.Required && v == "" {
-		return "", "این فیلد لازم است."
+		return "", "This field is required."
 	}
 	if len(v) > 20000 {
-		return "", "بیش از اندازه بلند است."
+		return "", "Too long."
 	}
 	return v, ""
 }

@@ -14,7 +14,7 @@ export interface ResourceOptions<T> {
   pluralLabel: string
   /** Shown in the navigation, e.g. <DocumentIcon /> (exported by the panel). */
   icon?: ReactNode
-  /** A navigation group heading, e.g. "محتوا". */
+  /** A navigation group heading, e.g. "Content". */
   group?: string
   /** Order in its group: lower first. Default: after the items that set one, in definition order. */
   navigationSort?: number

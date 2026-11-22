@@ -5,7 +5,7 @@ export const pageTrash = defineResource<PageTrash>({
   name: 'page_trash',
   label: tr({ fa: 'برگهٔ حذف‌شده', en: 'Trashed page' }),
   pluralLabel: tr({ fa: 'زباله‌دان برگه‌ها', en: 'Page trash' }),
-  // Opened from the pages list ("زباله‌دان").
+  // Opened from the pages list ("Trash").
   navigation: false,
   icon: <DocumentIcon />,
   group: tr({ fa: 'محتوا', en: 'Content' }),

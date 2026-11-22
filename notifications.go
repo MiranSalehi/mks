@@ -13,7 +13,7 @@ import (
 
 // Database notifications: messages for one user, shown under the bell in the panel.
 //
-//	p.Notify(mks.Notice{Type: "success", Title: "نوشته منتشر شد", URL: "/posts/12"}, authorID)
+//	p.Notify(mks.Notice{Type: "success", Title: "Post published", URL: "/posts/12"}, authorID)
 //
 // The UI checks for new ones every Options.NotificationPoll seconds while the tab is
 // visible (Goravel's gin driver buffers every response in its global timeout middleware,

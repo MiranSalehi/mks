@@ -7,7 +7,7 @@ const Noop = () => null
 describe('extensions', () => {
   it('makes custom fields with their own options and empty value', () => {
     const color = defineField<string | null, { swatches: string[] }>({ component: Noop, defaults: { swatches: ['#000000'] }, empty: null })
-    const a = color('color').option('swatches', ['#ffffff']).label('رنگ')
+    const a = color('color').option('swatches', ['#ffffff']).label('Color')
     const b = color('color')
     expect(a).toBeInstanceOf(CustomField)
     expect(a._options.swatches).toEqual(['#ffffff'])
@@ -19,10 +19,10 @@ describe('extensions', () => {
 
   it('makes custom columns', () => {
     const swatch = defineColumn({ component: Noop, defaults: { showHex: true } })
-    const c = swatch('color').option('showHex', false).label('رنگ')
+    const c = swatch('color').option('showHex', false).label('Color')
     expect(c).toBeInstanceOf(CustomColumn)
     expect(c._options).toEqual({ showHex: false })
-    expect(c._label).toBe('رنگ')
+    expect(c._label).toBe('Color')
   })
 
   it('defines plugins as plain data', () => {

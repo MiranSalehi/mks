@@ -10,7 +10,7 @@ func TestSafeLinkURL(t *testing.T) {
 	ok := []string{
 		"https://example.com", "http://example.com/a?b=c#d", "HTTPS://EXAMPLE.COM",
 		"/", "/sites/team/about", "#contact", "mailto:info@example.com", "tel:+982100000000",
-		"https://example.com/فارسی",
+		"https://example.com/café",
 	}
 	bad := []string{
 		"", " https://example.com", "https://example.com ", "javascript:alert(1)", "JavaScript:alert(1)",

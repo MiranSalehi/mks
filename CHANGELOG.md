@@ -19,6 +19,14 @@ Changes worth noting for each release are recorded here.
 
 ### Changed
 
+- The source is English-only: comments, server messages, default content, page
+  templates, theme text and UI defaults are translated. The Persian locale itself stays
+  (`src/locales/fa.ts`, the `persian` table in `i18n.go`, `tr({ fa, … })`, `L(fa, …)`,
+  `T(fa, …)`), because that is the translation data, not source text. Persian/Arabic
+  punctuation in input handling (digit conversion, `،` separators in CSV/regex parsing)
+  is kept for the same reason.
+- Jalali month and weekday names use Latin transliterations now, and the site's dates
+  and counters use Latin digits (the panel's fa messages still show Persian digits).
 - The repository is now the package: `git init` was reset to this directory, the old
   multi-package history was dropped, and the Go module path became
   `github.com/MiranSalehi/mks` (was `.../packages/mks`). The npm and Go releases share

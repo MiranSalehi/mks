@@ -90,7 +90,7 @@ func TestPageRevisionContentRejectsMalformedSnapshots(t *testing.T) {
 		{"missing field", func(s map[string]any) { delete(s, "show_page_header") }},
 		{"null title", func(s map[string]any) { s["title"] = nil }},
 		{"blank title", func(s map[string]any) { s["title"] = " \t" }},
-		{"long title", func(s map[string]any) { s["title"] = strings.Repeat("آ", 256) }},
+		{"long title", func(s map[string]any) { s["title"] = strings.Repeat("é", 256) }},
 		{"wrong title type", func(s map[string]any) { s["title"] = 12 }},
 		{"unknown page type", func(s map[string]any) { s["type"] = "script" }},
 		{"null header", func(s map[string]any) { s["show_page_header"] = nil }},

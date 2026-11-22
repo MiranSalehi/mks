@@ -77,7 +77,7 @@ export const activities = defineResource<Activity>({
 })
 
 /**
- * The activity log: a read-only "گزارش فعالیت" resource and, unless turned off, the latest
+ * The activity log: a read-only "Activity log" resource and, unless turned off, the latest
  * entries on the dashboard. Install the Go plugin (activity.Plugin) too.
  */
 export function activityLog(options: { group?: string; dashboard?: boolean } = {}): PanelPlugin {

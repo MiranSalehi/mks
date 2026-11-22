@@ -51,7 +51,7 @@ func (pl *Plugin) adminBar(req *request, hc *mks.HookContext) *adminBarView {
 		return base + path + "?tenant=" + url.QueryEscape(fmt.Sprint(req.site.ID))
 	}
 	allowed := func(permission string) bool { return pl.panel.Allowed(hc, permission) }
-	items := []AdminBarItem{{Key: "dashboard", Label: "پیشخوان", URL: link("/")}}
+	items := []AdminBarItem{{Key: "dashboard", Label: "Dashboard", URL: link("/")}}
 
 	edit := func(key, label, resource string, ability Ability, id uint) {
 		if id != 0 && allowed(resource+".update") && pl.can(hc, ability) {
@@ -60,24 +60,24 @@ func (pl *Plugin) adminBar(req *request, hc *mks.HookContext) *adminBarView {
 	}
 	switch r := req.record.(type) {
 	case *Post:
-		edit("edit_post", "ویرایش نوشته", "cms_posts", ManagePosts, r.ID)
+		edit("edit_post", "Edit post", "cms_posts", ManagePosts, r.ID)
 	case *Page:
-		edit("edit_page", "ویرایش برگه", "pages", ManagePages, r.ID)
+		edit("edit_page", "Edit page", "pages", ManagePages, r.ID)
 	case *Category:
-		edit("edit_category", "ویرایش دسته‌بندی", "cms_categories", ManageTaxonomies, r.ID)
+		edit("edit_category", "Edit category", "cms_categories", ManageTaxonomies, r.ID)
 	case *Tag:
-		edit("edit_tag", "ویرایش برچسب", "cms_tags", ManageTaxonomies, r.ID)
+		edit("edit_tag", "Edit tag", "cms_tags", ManageTaxonomies, r.ID)
 	case *Entry:
-		edit("edit_entry", "ویرایش", "entries_"+r.ContentType, ManagePosts, r.ID)
+		edit("edit_entry", "Edit", "entries_"+r.ContentType, ManagePosts, r.ID)
 	}
 	if allowed("cms_posts.create") && pl.can(hc, ManagePosts) {
-		items = append(items, AdminBarItem{Key: "new_post", Label: "نوشتهٔ تازه", URL: link("/cms_posts/create")})
+		items = append(items, AdminBarItem{Key: "new_post", Label: "New post", URL: link("/cms_posts/create")})
 	}
 	if allowed("cms_posts.view_any") {
-		items = append(items, AdminBarItem{Key: "manage_posts", Label: "نوشته‌ها", URL: link("/cms_posts")})
+		items = append(items, AdminBarItem{Key: "manage_posts", Label: "Posts", URL: link("/cms_posts")})
 	}
 	if allowed("pages.view_any") {
-		items = append(items, AdminBarItem{Key: "manage_pages", Label: "برگه‌ها", URL: link("/pages")})
+		items = append(items, AdminBarItem{Key: "manage_pages", Label: "Pages", URL: link("/pages")})
 	}
 	if out, ok := pl.filter("frontend_admin_bar.items", items, req.site, req.record).([]AdminBarItem); ok {
 		items = out

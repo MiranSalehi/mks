@@ -24,7 +24,7 @@ func TestMatchRouteUsesPermalinksInOrder(t *testing.T) {
 		{"/categories", routeCategories, ""},
 		{"/tags", routeTags, ""},
 		{"/tag/go", routeTag, "go"},
-		{"/tag/%D8%B3%D9%84%D8%A7%D9%85", routeTag, "سلام"},
+		{"/tag/caf%C3%A9", routeTag, "café"},
 		{"/page/about", routePage, "about"},
 		{"/author/12", routeAuthor, "12"},
 		{"/nothing", routeNone, ""},
@@ -70,7 +70,7 @@ func TestToJalali(t *testing.T) {
 		}
 	}
 	d := time.Date(2026, 11, 21, 10, 0, 0, 0, time.UTC)
-	if got, _ := formatDate(&d); got != "۳۰ آبان ۱۴۰۵" {
+	if got, _ := formatDate(&d); got != "30 Aban 1405" {
 		t.Errorf("formatDate = %q", got)
 	}
 	if got, iso := formatDate(nil); got != "" || iso != "" {
@@ -79,7 +79,7 @@ func TestToJalali(t *testing.T) {
 }
 
 func TestPlainTextAndPagination(t *testing.T) {
-	if got := plainText("<p>سلام &amp; <b>دنیا</b></p>\n<script>x</script>", 160); got != "سلام & دنیا x" {
+	if got := plainText("<p>café &amp; <b>naïve</b></p>\n<script>x</script>", 160); got != "café & naïve x" {
 		t.Errorf("plainText = %q", got)
 	}
 	if got := plainText("abcdefghij", 4); got != "abcd…" {
@@ -89,7 +89,7 @@ func TestPlainTextAndPagination(t *testing.T) {
 		t.Error("one page needs no pager")
 	}
 	p := pagination("/b", 2, PerPage*2+1)
-	if len(p) != 3 || p[0].URL != "/b" || p[1].URL != "/b?page=2" || !p[1].Current || p[2].Label != "۳" {
+	if len(p) != 3 || p[0].URL != "/b" || p[1].URL != "/b?page=2" || !p[1].Current || p[2].Label != "3" {
 		t.Errorf("pagination = %#v", p)
 	}
 }

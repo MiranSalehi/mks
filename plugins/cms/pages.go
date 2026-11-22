@@ -112,7 +112,7 @@ func (pl *Plugin) validatePageFields(data map[string]any, stored *Page) error {
 	}
 	if slug, ok := data["slug"].(string); ok && slug != "" {
 		if siteID == nil {
-			return mks.Reject("برای برگه، سایت فعال لازم است.")
+			return mks.Reject("Pages need an active site.")
 		}
 		// A trashed page still holds its slug (the unique index), so it can be restored.
 		q := pl.query().Model(&Page{}).Where("site_id = ? AND slug = ?", siteID, slug)
@@ -124,7 +124,7 @@ func (pl *Plugin) validatePageFields(data map[string]any, stored *Page) error {
 			return err
 		}
 		if count > 0 {
-			return mks.ValidationErrors{"slug": "این نامک در سایت انتخاب‌شده قبلاً استفاده شده است."}
+			return mks.ValidationErrors{"slug": "This slug is already used on the selected site."}
 		}
 	}
 	if raw, sent := data["builder_payload"]; sent {
@@ -163,7 +163,7 @@ func (pl *Plugin) checkPagePublication(data map[string]any, stored *Page) error 
 			}
 		}
 		if !pl.hasContent(blocks) {
-			return mks.ValidationErrors{"builder_payload": "برای انتشار، دست‌کم یک بلوک با محتوا لازم است."}
+			return mks.ValidationErrors{"builder_payload": "Publishing needs at least one block with content."}
 		}
 	} else {
 		var content string
@@ -173,7 +173,7 @@ func (pl *Plugin) checkPagePublication(data map[string]any, stored *Page) error 
 			content = *stored.Content
 		}
 		if strings.TrimSpace(content) == "" {
-			return mks.ValidationErrors{"content": "برای انتشار، محتوای برگه لازم است."}
+			return mks.ValidationErrors{"content": "Publishing needs page content."}
 		}
 	}
 
@@ -183,7 +183,7 @@ func (pl *Plugin) checkPagePublication(data map[string]any, stored *Page) error 
 	}
 	if status == "scheduled" {
 		if emptyDate(publishedAt) {
-			return mks.ValidationErrors{"published_at": "برای انتشار زمان‌بندی‌شده، تاریخ و ساعت لازم است."}
+			return mks.ValidationErrors{"published_at": "A scheduled publish needs a date and time."}
 		}
 		return nil
 	}

@@ -149,7 +149,7 @@ func TestPageCopySlugsPreserveCompleteSuffixWithinLimit(t *testing.T) {
 		{"hyphens only", "---", []string{"page-copy"}},
 		{"trailing hyphens", "about---", []string{"about-copy", "about-copy-2"}},
 		{"hyphen at truncation", strings.Repeat("a", 249) + "-extra", []string{strings.Repeat("a", 249) + "-copy"}},
-		{"unicode boundary", strings.Repeat("آ", 128), []string{strings.Repeat("آ", 125) + "-copy", strings.Repeat("آ", 124) + "-copy-2"}},
+		{"unicode boundary", strings.Repeat("é", 128), []string{strings.Repeat("é", 125) + "-copy", strings.Repeat("é", 124) + "-copy-2"}},
 		{"maximum slug and two digit collisions", strings.Repeat("a", 255), nil},
 	}
 	for number := 1; number <= 12; number++ {
@@ -255,13 +255,13 @@ func TestDuplicatePageUsesLockedContentAndResetsPublication(t *testing.T) {
 
 func TestDuplicatePageTruncatesTitleWithoutLosingCopySuffix(t *testing.T) {
 	page := actionsTestPage()
-	page.Title = strings.Repeat("آ", 255)
+	page.Title = strings.Repeat("é", 255)
 	q := &ormmock.Query{}
 	actionsExpectPageLock(q, &page, &page, nil)
 	actionsExpectSlug(q, page.SiteID, page.Slug+"-copy", 0, nil)
 	q.On("Create", mock.AnythingOfType("*cms.Page")).Return(nil).Once().Run(func(args mock.Arguments) {
 		copy := args.Get(0).(*Page)
-		if copy.Title != strings.Repeat("آ", 248)+" (copy)" || utf8.RuneCountInString(copy.Title) != 255 {
+		if copy.Title != strings.Repeat("é", 248)+" (copy)" || utf8.RuneCountInString(copy.Title) != 255 {
 			t.Fatalf("incorrect title truncation: %q", copy.Title)
 		}
 		copy.ID = 101

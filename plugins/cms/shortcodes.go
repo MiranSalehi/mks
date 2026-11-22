@@ -100,10 +100,10 @@ var (
 func (pl *Plugin) coreShortcodes() {
 	pl.AddShortcode("year", func(_ map[string]string, _ string, ctx ShortcodeContext) string {
 		if ctx.Calendar == "gregorian" {
-			return persianDigits.Replace(strconv.Itoa(ctx.Now.Year()))
+			return strconv.Itoa(ctx.Now.Year())
 		}
 		jy, _, _ := toJalali(ctx.Now.Year(), int(ctx.Now.Month()), ctx.Now.Day())
-		return persianDigits.Replace(strconv.Itoa(jy))
+		return strconv.Itoa(jy)
 	})
 	pl.AddShortcode("site_name", func(_ map[string]string, _ string, ctx ShortcodeContext) string {
 		if ctx.Site == nil {
@@ -111,8 +111,8 @@ func (pl *Plugin) coreShortcodes() {
 		}
 		return stdhtml.EscapeString(ctx.Site.Name)
 	})
-	pl.DescribeShortcode(ShortcodeInfo{Tag: "year", Label: "سال جاری", Description: "سال فعلی را درج می‌کند (با تقویم شمسی وقتی فعال باشد)."})
-	pl.DescribeShortcode(ShortcodeInfo{Tag: "site_name", Label: "نام سایت", Description: "نام سایت از تنظیمات یا نام برنامه را درج می‌کند."})
+	pl.DescribeShortcode(ShortcodeInfo{Tag: "year", Label: "Current year", Description: "Inserts the current year (Jalali when enabled)."})
+	pl.DescribeShortcode(ShortcodeInfo{Tag: "site_name", Label: "Site name", Description: "Inserts the site name from settings, or the app name."})
 }
 
 // renderShortcodes expands the registered shortcodes of html.

@@ -77,7 +77,7 @@ export function NotificationBell() {
             aria-hidden="true"
             className="absolute -top-0.5 -end-0.5 flex h-4.5 min-w-4.5 animate-pop items-center justify-center rounded-full bg-danger-500 px-1 text-[10px] leading-none font-bold text-white ring-2 ring-white dark:ring-gray-950"
           >
-            {unread > 99 ? '۹۹+' : nf.format(unread)}
+            {unread > 99 ? '99+' : nf.format(unread)}
           </span>
         )}
       </button>

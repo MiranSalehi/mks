@@ -65,17 +65,17 @@ func savePageRevision(ctx *mks.HookContext, page *Page) error {
 
 func (pl *Plugin) restorePageRevision(ctx *mks.ActionContext[PageRevision]) (*mks.ActionResult, error) {
 	if ctx == nil || !pl.can(ctx.HookContext, ManagePages) {
-		return nil, mks.Reject("اجازهٔ بازیابی نسخهٔ برگه را ندارید.")
+		return nil, mks.Reject("You are not allowed to restore page revisions.")
 	}
 	if len(ctx.Records) != 1 || ctx.Records[0] == nil {
-		return nil, mks.Reject("برای بازیابی دقیقاً یک نسخه انتخاب کنید.")
+		return nil, mks.Reject("Select exactly one revision to restore.")
 	}
 	if ctx.Query == nil {
 		return nil, errors.New("page restore requires an action transaction")
 	}
 	revision := ctx.Records[0] // Server-loaded records only; ctx.Data is never used.
 	if revision.ID == 0 || revision.SiteID == 0 || revision.PageID == 0 {
-		return nil, mks.Reject("نسخهٔ انتخاب‌شده معتبر نیست.")
+		return nil, mks.Reject("Invalid selected revision.")
 	}
 
 	var page Page
@@ -83,13 +83,13 @@ func (pl *Plugin) restorePageRevision(ctx *mks.ActionContext[PageRevision]) (*mk
 		Where("site_id = ? AND id = ?", revision.SiteID, revision.PageID).
 		Where("deleted_at IS NULL").LockForUpdate().First(&page)
 	if errors.Is(err, frameworkerrors.OrmRecordNotFound) || (err == nil && page.ID == 0) {
-		return nil, mks.Reject("برگهٔ این نسخه در سایت انتخاب‌شده یافت نشد.")
+		return nil, mks.Reject("The revision's page was not found on the selected site.")
 	}
 	if err != nil {
 		return nil, fmt.Errorf("find page for revision restore: %w", err)
 	}
 	if page.ID != revision.PageID || page.SiteID != revision.SiteID {
-		return nil, mks.Reject("برگهٔ این نسخه در سایت انتخاب‌شده یافت نشد.")
+		return nil, mks.Reject("The revision's page was not found on the selected site.")
 	}
 
 	restored, err := pageRevisionContent(revision.Snapshot.V)
@@ -100,7 +100,7 @@ func (pl *Plugin) restorePageRevision(ctx *mks.ActionContext[PageRevision]) (*mk
 	// checked again for this site.
 	blocks, errs := pl.NormalizeBuilder(restored.BuilderPayload, revision.SiteID, "builder_payload")
 	if len(errs) > 0 {
-		return nil, mks.Reject("محتوای نسخهٔ انتخاب‌شده معتبر نیست.")
+		return nil, mks.Reject("Invalid selected revision content.")
 	}
 	restored.BuilderPayload = blocks
 	data := restored.changes()
@@ -121,7 +121,7 @@ func (pl *Plugin) restorePageRevision(ctx *mks.ActionContext[PageRevision]) (*mk
 		return nil, fmt.Errorf("restore page revision: %w", err)
 	}
 	if updated == nil || updated.RowsAffected != 1 {
-		return nil, mks.Reject("برگهٔ نسخه تغییر کرده یا دیگر در دسترس نیست.")
+		return nil, mks.Reject("The revision's page changed or is no longer available.")
 	}
 
 	// Apply the same validated values in memory for the appended snapshot. Do not
@@ -131,7 +131,7 @@ func (pl *Plugin) restorePageRevision(ctx *mks.ActionContext[PageRevision]) (*mk
 	if err := savePageRevision(ctx.HookContext, &page); err != nil {
 		return nil, err
 	}
-	result := mks.Success("نسخهٔ برگه بازیابی شد.")
+	result := mks.Success("Page revision restored.")
 	result.Invalidate = []string{"pages", "page_revisions"}
 	return result, nil
 }
@@ -153,7 +153,7 @@ type pageRevisionFields struct {
 func pageRevisionContent(snapshot map[string]any) (pageRevisionFields, error) {
 	var restored pageRevisionFields
 	invalid := func() (pageRevisionFields, error) {
-		return pageRevisionFields{}, mks.Reject("محتوای نسخهٔ انتخاب‌شده معتبر نیست.")
+		return pageRevisionFields{}, mks.Reject("Invalid selected revision content.")
 	}
 	selected := make(map[string]any, 9)
 	for _, field := range []string{

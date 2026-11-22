@@ -51,7 +51,7 @@ func parseImageEdit(data map[string]any) (imageEdit, error) {
 	if v, sent := data["rotate"]; sent && v != nil {
 		r, ok := num(v)
 		if !ok || r%90 != 0 || r >= 360 {
-			return e, mks.ValidationErrors{"edit": "چرخش معتبر نیست."}
+			return e, mks.ValidationErrors{"edit": "Invalid rotation."}
 		}
 		e.Rotate = r
 	}
@@ -63,7 +63,7 @@ func parseImageEdit(data map[string]any) (imageEdit, error) {
 		e.Width, good[2] = num(crop["width"])
 		e.Height, good[3] = num(crop["height"])
 		if !good[0] || !good[1] || !good[2] || !good[3] {
-			return e, mks.ValidationErrors{"edit": "ناحیهٔ برش معتبر نیست."}
+			return e, mks.ValidationErrors{"edit": "Invalid crop area."}
 		}
 	}
 	return e, nil
@@ -84,7 +84,7 @@ func applyImageEdit(src image.Image, e imageEdit) (image.Image, error) {
 	}
 	r := image.Rect(e.X, e.Y, e.X+e.Width, e.Y+e.Height).Add(b.Min).Intersect(b)
 	if r.Dx() < 1 || r.Dy() < 1 {
-		return nil, mks.ValidationErrors{"edit": "ناحیهٔ برش بیرون از تصویر است."}
+		return nil, mks.ValidationErrors{"edit": "The crop area is outside the image."}
 	}
 	out := image.NewRGBA(image.Rect(0, 0, r.Dx(), r.Dy()))
 	draw.Draw(out, out.Bounds(), img, r.Min, draw.Src)
@@ -208,11 +208,11 @@ func tiffOrientation(t []byte) int {
 // editImage is the "edit_image" action of the media library.
 func (pl *Plugin) editImage(ctx *mks.ActionContext[Media]) (*mks.ActionResult, error) {
 	if len(ctx.Records) != 1 {
-		return nil, mks.Reject("یک تصویر را انتخاب کنید.")
+		return nil, mks.Reject("Select an image.")
 	}
 	m := ctx.Records[0]
 	if !pl.canEdit(m.MimeType) {
-		return nil, mks.Reject("فقط تصویرهای JPEG، PNG و WebP ویرایش می‌شوند.")
+		return nil, mks.Reject("Only JPEG, PNG and WebP images can be edited.")
 	}
 	edit, err := parseImageEdit(ctx.Data)
 	if err != nil {
@@ -220,7 +220,7 @@ func (pl *Plugin) editImage(ctx *mks.ActionContext[Media]) (*mks.ActionResult, e
 	}
 	d := pl.driver()
 	if d == nil {
-		return nil, mks.Reject("فضای فایل تنظیم نشده است.")
+		return nil, mks.Reject("File storage is not configured.")
 	}
 	content, err := d.Get(m.Path)
 	if err != nil {
@@ -229,11 +229,11 @@ func (pl *Plugin) editImage(ctx *mks.ActionContext[Media]) (*mks.ActionResult, e
 	raw := []byte(content)
 	cfg, _, err := image.DecodeConfig(bytes.NewReader(raw))
 	if err != nil || cfg.Width*cfg.Height > maxConvertPixels {
-		return nil, mks.Reject("این تصویر خوانده نمی‌شود یا بیش از اندازه بزرگ است.")
+		return nil, mks.Reject("This image cannot be read, or it is too large.")
 	}
 	src, _, err := image.Decode(bytes.NewReader(raw))
 	if err != nil {
-		return nil, mks.Reject("این تصویر خوانده نمی‌شود.")
+		return nil, mks.Reject("This image cannot be read.")
 	}
 	if m.MimeType == "image/jpeg" {
 		src = upright(src, exifOrientation(raw))
@@ -280,7 +280,7 @@ func (pl *Plugin) editImage(ctx *mks.ActionContext[Media]) (*mks.ActionResult, e
 			pl.deleteFiles(map[string]string{"": target})
 			return nil, err
 		}
-		res := mks.Success("تصویر ویرایش‌شده به‌عنوان فایل تازه در کتابخانه ذخیره شد.")
+		res := mks.Success("The edited image was saved as a new file in the library.")
 		res.Invalidate = []string{"cms_media"}
 		return res, nil
 	}
@@ -302,7 +302,7 @@ func (pl *Plugin) editImage(ctx *mks.ActionContext[Media]) (*mks.ActionResult, e
 	}); err != nil {
 		return nil, err
 	}
-	res := mks.Success("تصویر ویرایش شد.")
+	res := mks.Success("Image updated.")
 	res.Invalidate = []string{"cms_media"}
 	return res, nil
 }

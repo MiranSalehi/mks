@@ -27,15 +27,15 @@ export { addSeoCheck, analyzeSeo, type SeoCheck, type SeoCheckContext } from './
 export { categories, comments, commentStatusLabels, media, mediaAccept, mediaGallery, mediaPicker, menuLocations, menus, pageRevisions, pageTrash, pages, pluginsPage, postsResource, postStatusLabels, sections, settingsPages, tags, themesPage }
 
 export interface CmsOptions {
-  /** Sidebar group of posts, pages, categories, sections, comments and tags. Default: "محتوا". */
+  /** Sidebar group of posts, pages, categories, sections, comments and tags. Default: "Content". */
   contentGroup?: string
-  /** Sidebar group of the media library. Default: "رسانه". */
+  /** Sidebar group of the media library. Default: "Media". */
   mediaGroup?: string
-  /** Sidebar group of themes, menus and menu locations. Default: "ظاهر". */
+  /** Sidebar group of themes, menus and menu locations. Default: "Appearance". */
   appearanceGroup?: string
   /**
    * The cluster of the settings pages (General, Permalinks, Performance, Extensions).
-   * Default: "settings", a "تنظیمات" entry the plugin adds; other plugins' pages can join it.
+   * Default: "settings", a "Settings" entry the plugin adds; other plugins' pages can join it.
    */
   settingsCluster?: string
   /** The resource authors are picked from. Default: "users". */

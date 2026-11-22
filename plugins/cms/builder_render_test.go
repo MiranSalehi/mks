@@ -193,7 +193,7 @@ func TestCanvasChrome(t *testing.T) {
 	]`), &blocks); err != nil {
 		t.Fatal(err)
 	}
-	r := &renderer{pl: &Plugin{}, seen: map[uint]bool{}, sections: map[uint][]Block{}, canvas: true, labels: map[string]string{"heading": `عنوان <x>`}}
+	r := &renderer{pl: &Plugin{}, seen: map[uint]bool{}, sections: map[uint][]Block{}, canvas: true, labels: map[string]string{"heading": `Title <x>`}}
 	h, err := r.blocks(blocks, 0, "")
 	if err != nil {
 		t.Fatal(err)
@@ -202,7 +202,7 @@ func TestCanvasChrome(t *testing.T) {
 	for _, want := range []string{
 		`<div class="mks-list" data-pb-list="">`,
 		`data-pb-insert="|0"`, `data-pb-insert="|1"`, `data-pb-insert="|2"`,
-		`<div class="mks-block" data-pb-path="0"><div class="mks-tools"><span class="mks-name" data-pb-drag>عنوان &lt;x&gt;</span>`,
+		`<div class="mks-block" data-pb-path="0"><div class="mks-tools"><span class="mks-name" data-pb-drag>Title &lt;x&gt;</span>`,
 		`data-pb-act="edit"`, `data-pb-act="delete"`,
 		// Each column is a list of its own; an empty one shows its insert row open.
 		`data-pb-list="1.0"`, `data-pb-path="1.0.0"`, `<span class="mks-name" data-pb-drag>text</span>`,

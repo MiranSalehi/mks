@@ -79,7 +79,7 @@ func (pl *Plugin) start(args []string, user string) (*process, error) {
 		p.mu.Unlock()
 	}
 	if running >= maxRunning {
-		return nil, fmt.Errorf("حداکثر %d فرمان با هم در پس‌زمینه اجرا می‌شود.", maxRunning)
+		return nil, fmt.Errorf("At most %d commands run in the background at once.", maxRunning)
 	}
 	bin := pl.Binary
 	if bin == "" {
@@ -126,10 +126,10 @@ func (pl *Plugin) wait(p *process, cmd *exec.Cmd, ctx context.Context) {
 	switch {
 	case p.stopped:
 		p.Status = "stopped"
-		p.out.WriteString("\n[متوقف شد]")
+		p.out.WriteString("\n[stopped]")
 	case ctx.Err() == context.DeadlineExceeded:
 		p.Status = "failed"
-		p.out.WriteString("\n[زمان فرمان تمام شد]")
+		p.out.WriteString("\n[command timed out]")
 	case code == 0:
 		p.Status = "completed"
 	default:
@@ -249,7 +249,7 @@ func (pl *Plugin) Routes(r route.Router) {
 		}
 		p := pl.find(ctx.Request().Route("id"))
 		if p == nil {
-			return ctx.Response().Json(404, http.Json{"message": "این اجرا پیدا نشد."})
+			return ctx.Response().Json(404, http.Json{"message": "This run was not found."})
 		}
 		offset, _ := strconv.Atoi(ctx.Request().Query("offset", "0"))
 		ctx.Response().Header("Cache-Control", "no-store")
@@ -261,7 +261,7 @@ func (pl *Plugin) Routes(r route.Router) {
 		}
 		p := pl.find(ctx.Request().Route("id"))
 		if p == nil {
-			return ctx.Response().Json(404, http.Json{"message": "این اجرا پیدا نشد."})
+			return ctx.Response().Json(404, http.Json{"message": "This run was not found."})
 		}
 		p.mu.Lock()
 		running := p.Status == "running"

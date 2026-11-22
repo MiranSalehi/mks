@@ -50,7 +50,7 @@ func TestPublicPageAvailable(t *testing.T) {
 }
 
 func TestRenderCMSPageSanitizesAndEscapesContent(t *testing.T) {
-	richText := `<p>سلام</p><script>alert(1)</script><img src=x onerror=alert(2)>`
+	richText := `<p>Hello</p><script>alert(1)</script><img src=x onerror=alert(2)>`
 	page := Page{
 		Title: "<img src=x onerror=alert(3)>", Slug: "welcome", Type: "simple",
 		Status: "published", Content: &richText, ShowPageHeader: true,
@@ -69,7 +69,7 @@ func TestRenderCMSPageSanitizesAndEscapesContent(t *testing.T) {
 	if !strings.Contains(html, "&lt;img src=x onerror=alert(3)&gt;") || !strings.Contains(html, "href=\"/sites/my-site/page/welcome\"") {
 		t.Fatalf("escaped title or canonical URL missing: %s", html)
 	}
-	if !strings.Contains(html, "<p>سلام</p>") {
+	if !strings.Contains(html, "<p>Hello</p>") {
 		t.Fatalf("safe rich text was not retained: %s", html)
 	}
 }
@@ -126,12 +126,12 @@ func TestRenderCMSPageMenus(t *testing.T) {
 	}
 	html := string(body)
 	for _, want := range []string{
-		`<nav aria-label="منوی اصلی">`,
+		`<nav aria-label="Main menu">`,
 		`<a href="/sites/s/home" aria-current="page">&lt;b&gt;Home&lt;/b&gt;</a>`,
 		`<details class="current"><summary>Company</summary>`,
 		`<a href="tel:&#43;982100000000">Call</a>`,
 		`<a href="https://blog.example/?a=1&amp;b=2" target="_blank" rel="noopener noreferrer">Blog</a>`,
-		`<nav aria-label="منوی پایین">`,
+		`<nav aria-label="Footer menu">`,
 		`<a href="mailto:info@example.com">Mail</a>`,
 	} {
 		if !strings.Contains(html, want) {

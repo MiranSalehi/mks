@@ -15,8 +15,8 @@ type Location struct {
 
 // DefaultLocations are the menu locations of the built-in site theme.
 var DefaultLocations = []Location{
-	{Key: "header", Label: "منوی بالای سایت"},
-	{Key: "footer", Label: "منوی پایین سایت"},
+	{Key: "header", Label: "Site header menu"},
+	{Key: "footer", Label: "Site footer menu"},
 }
 
 func (pl *Plugin) locations() []Location {
@@ -35,10 +35,8 @@ func (pl *Plugin) isLocation(key string) bool {
 	return false
 }
 
-var persianDigits = strings.NewReplacer("0", "۰", "1", "۱", "2", "۲", "3", "۳", "4", "۴", "5", "۵", "6", "۶", "7", "۷", "8", "۸", "9", "۹")
-
 // faDigits formats a number with Persian digits.
-func faDigits(n int) string { return persianDigits.Replace(strconv.Itoa(n)) }
+func faDigits(n int) string { return strconv.Itoa(n) }
 
 // MaxURLLength bounds a custom menu link.
 const MaxURLLength = 2048

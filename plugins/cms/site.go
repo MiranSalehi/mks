@@ -154,7 +154,7 @@ func (pl *Plugin) ShowSite(ctx http.Context) http.Response {
 		resp, err = pl.showPage(req, value)
 	case routePosts:
 		req.view = "posts"
-		resp, err = pl.showPostList(req, "", "نوشته‌ها", "", nil, pl.listURL(site.Slug, pl.permalinksFor(site.Slug).Posts))
+		resp, err = pl.showPostList(req, "", "Posts", "", nil, pl.listURL(site.Slug, pl.permalinksFor(site.Slug).Posts))
 	case routePost:
 		req.view = "single"
 		resp, err = pl.showPost(req, value)
@@ -646,7 +646,7 @@ func (pl *Plugin) showPostList(req *request, kicker, heading string, desc templa
 		return nil, err
 	}
 	lv := &listView{Kicker: kicker, Heading: heading, Description: desc, Items: items,
-		Pagination: pagination(base, req.page, total), Empty: "هنوز نوشته‌ای منتشر نشده است."}
+		Pagination: pagination(base, req.page, total), Empty: "No post has been published yet."}
 	canonical := base
 	if req.page > 1 {
 		canonical = base + "?page=" + strconv.Itoa(req.page)
@@ -665,7 +665,7 @@ func pagination(base string, current int, total int64) []pageLink {
 		if i > 1 {
 			u = base + "?page=" + strconv.Itoa(i)
 		}
-		out = append(out, pageLink{Label: persianDigits.Replace(strconv.Itoa(i)), URL: safeURL(u), Current: i == current})
+		out = append(out, pageLink{Label: strconv.Itoa(i), URL: safeURL(u), Current: i == current})
 	}
 	return out
 }
@@ -711,7 +711,7 @@ func (pl *Plugin) showCategory(req *request, path string) (http.Response, error)
 	if cat.Description != nil {
 		desc = template.HTML(mks.SanitizeHTML(*cat.Description)) //nolint:gosec -- sanitized
 	}
-	resp, err := pl.showPostList(req, "دسته‌بندی", cat.Name, desc, func(q orm.Query) orm.Query {
+	resp, err := pl.showPostList(req, "Category", cat.Name, desc, func(q orm.Query) orm.Query {
 		return q.Where(PostsTable+".id IN (SELECT post_id FROM "+CategoryPostTable+" WHERE category_id = ?)", cat.ID)
 	}, pl.CategoryURL(req.site.Slug, cat.Path))
 	return resp, err
@@ -731,7 +731,7 @@ func (pl *Plugin) showTag(req *request, slug string) (http.Response, error) {
 	if tag.Description != nil {
 		desc = template.HTML(mks.SanitizeHTML(*tag.Description)) //nolint:gosec -- sanitized
 	}
-	return pl.showPostList(req, "برچسب", tag.Name, desc, func(q orm.Query) orm.Query {
+	return pl.showPostList(req, "Tag", tag.Name, desc, func(q orm.Query) orm.Query {
 		return q.Where(PostsTable+".id IN (SELECT post_id FROM "+PostTagTable+" WHERE tag_id = ?)", tag.ID)
 	}, pl.TagURL(req.site.Slug, tag.Slug))
 }
@@ -756,7 +756,7 @@ func (pl *Plugin) showAuthor(req *request, key string) (http.Response, error) {
 	if name == "" {
 		return pl.notFoundFor(req), nil
 	}
-	return pl.showPostList(req, "نویسنده", name, "", func(q orm.Query) orm.Query {
+	return pl.showPostList(req, "Author", name, "", func(q orm.Query) orm.Query {
 		return q.Where(PostsTable+".author_id = ?", key)
 	}, pl.AuthorURL(req.site.Slug, key))
 }
@@ -796,9 +796,9 @@ func (pl *Plugin) showCategories(req *request) (http.Response, error) {
 		}
 	}
 	walk(roots, 0)
-	return pl.html(req, layoutView{Title: documentTitle("دسته‌بندی‌ها", nil, req.site),
+	return pl.html(req, layoutView{Title: documentTitle("Categories", nil, req.site),
 		Canonical: safeURL(pl.listURL(req.site.Slug, pl.permalinksFor(req.site.Slug).Categories)),
-		Terms:     &termsView{Heading: "دسته‌بندی‌ها", Items: items}}, false)
+		Terms:     &termsView{Heading: "Categories", Items: items}}, false)
 }
 
 func (pl *Plugin) showTags(req *request) (http.Response, error) {
@@ -814,9 +814,9 @@ func (pl *Plugin) showTags(req *request) (http.Response, error) {
 	for _, t := range tags {
 		items = append(items, termView{Name: t.Name, URL: safeURL(pl.TagURL(req.site.Slug, t.Slug)), Count: countLabel(counts[t.ID])})
 	}
-	return pl.html(req, layoutView{Title: documentTitle("برچسب‌ها", nil, req.site),
+	return pl.html(req, layoutView{Title: documentTitle("Tags", nil, req.site),
 		Canonical: safeURL(pl.listURL(req.site.Slug, pl.permalinksFor(req.site.Slug).Tags)),
-		Terms:     &termsView{Heading: "برچسب‌ها", Items: items}}, false)
+		Terms:     &termsView{Heading: "Tags", Items: items}}, false)
 }
 
 // publishedCounts counts the public posts of each term through a pivot table.
@@ -841,7 +841,7 @@ func countLabel(n int64) string {
 	if n == 0 {
 		return ""
 	}
-	return persianDigits.Replace(strconv.FormatInt(n, 10))
+	return strconv.FormatInt(n, 10)
 }
 
 // --- menus ---------------------------------------------------------------------------------

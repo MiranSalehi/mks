@@ -162,9 +162,9 @@ func (pl *Plugin) Register(p *mks.Panel) {
 				if err := ctx.Query.Create(&entry); err != nil {
 					return nil, err
 				}
-				r := mks.Success(fmt.Sprintf("پایان با کد %d در %s.", code, dur.Round(time.Millisecond)))
+				r := mks.Success(fmt.Sprintf("Finished with code %d in %s.", code, dur.Round(time.Millisecond)))
 				if code != 0 {
-					r = mks.Warning(fmt.Sprintf("فرمان با کد %d پایان یافت.", code))
+					r = mks.Warning(fmt.Sprintf("The command exited with code %d.", code))
 				}
 				r.Invalidate = []string{"console_logs"}
 				r.Data = map[string]any{"run": entry}
@@ -192,16 +192,16 @@ var (
 func (pl *Plugin) Parse(line string) ([]string, error) {
 	line = strings.TrimSpace(line)
 	if line == "" || len(line) > maxCommand {
-		return nil, errors.New("فرمان خالی یا بیش از اندازه بلند است.")
+		return nil, errors.New("The command is empty or too long.")
 	}
 	for _, r := range line {
 		if r < ' ' || r == 0x7f {
-			return nil, errors.New("فرمان نویسهٔ کنترلی دارد.")
+			return nil, errors.New("The command contains a control character.")
 		}
 	}
 	for _, bad := range strings.Fields(forbidden) {
 		if strings.Contains(line, bad) {
-			return nil, fmt.Errorf("نویسهٔ %q مجاز نیست.", bad)
+			return nil, fmt.Errorf("The character %q is not allowed.", bad)
 		}
 	}
 	fields := strings.Fields(line)
@@ -209,7 +209,7 @@ func (pl *Plugin) Parse(line string) ([]string, error) {
 		fields = fields[1:]
 	}
 	if len(fields) == 0 {
-		return nil, errors.New("فرمانی نوشته نشده است.")
+		return nil, errors.New("No command was entered.")
 	}
 	ok := false
 	for _, allowed := range pl.allowed() {
@@ -218,14 +218,14 @@ func (pl *Plugin) Parse(line string) ([]string, error) {
 		}
 	}
 	if !ok || strings.HasPrefix(fields[0], "-") {
-		return nil, fmt.Errorf("فرمان «%s» مجاز نیست.", fields[0])
+		return nil, fmt.Errorf("The command \"%s\" is not allowed.", fields[0])
 	}
 	for _, a := range fields[1:] {
 		if !argRE.MatchString(a) {
-			return nil, fmt.Errorf("آرگومان «%s» مجاز نیست.", a)
+			return nil, fmt.Errorf("The argument \"%s\" is not allowed.", a)
 		}
 		if a == "--env" || strings.HasPrefix(a, "--env=") {
-			return nil, errors.New("--env مجاز نیست.")
+			return nil, errors.New("--env is not allowed.")
 		}
 	}
 	return fields, nil
@@ -261,7 +261,7 @@ func (pl *Plugin) run(args []string) (string, int, time.Duration) {
 		}
 	}
 	if ctx.Err() != nil {
-		out.WriteString("\n[زمان فرمان تمام شد]")
+		out.WriteString("\n[command timed out]")
 	}
 	return stripANSI(out.String()), code, dur
 }
@@ -288,7 +288,7 @@ func (c *capped) Write(p []byte) (int, error) {
 
 func (c *capped) String() string {
 	if c.cut {
-		return c.Buffer.String() + "\n[خروجی کوتاه شد]"
+		return c.Buffer.String() + "\n[output truncated]"
 	}
 	return c.Buffer.String()
 }
@@ -434,30 +434,30 @@ func (pl *Plugin) checks() []Check {
 	start := time.Now()
 	var one int
 	if err := pl.Orm.Query().Raw("SELECT 1").Scan(&one); err != nil {
-		add("database", "پایگاه داده", "failed", err.Error())
+		add("database", "Database", "failed", err.Error())
 	} else {
 		ms := time.Since(start).Milliseconds()
 		status := "ok"
 		if ms > 200 {
 			status = "warning"
 		}
-		add("database", "پایگاه داده", status, fmt.Sprintf("پاسخ در %d میلی‌ثانیه", ms))
+		add("database", "Database", status, fmt.Sprintf("Responded in %d ms", ms))
 	}
 
 	if pl.Cache == nil {
-		add("cache", "cache", "warning", "تنظیم نشده")
+		add("cache", "cache", "warning", "Not set")
 	} else {
 		key := "system:health:" + fmt.Sprint(time.Now().UnixNano())
 		if err := pl.Cache.Put(key, "ok", time.Minute); err != nil || pl.Cache.GetString(key) != "ok" {
-			add("cache", "cache", "failed", "نوشتن یا خواندن نشد")
+			add("cache", "cache", "failed", "Could not read or write")
 		} else {
-			add("cache", "cache", "ok", "نوشتن و خواندن")
+			add("cache", "cache", "ok", "Read and write")
 		}
 		pl.Cache.Forget(key)
 	}
 
 	if pl.Storage == nil {
-		add("storage", "فضای فایل", "warning", "تنظیم نشده")
+		add("storage", "File storage", "warning", "Not set")
 	} else {
 		disk := pl.Disk
 		if disk == "" {
@@ -466,10 +466,10 @@ func (pl *Plugin) checks() []Check {
 		d := pl.Storage.Disk(disk)
 		name := ".health-" + fmt.Sprint(time.Now().UnixNano())
 		if err := d.Put(name, "ok"); err != nil {
-			add("storage", "فضای فایل", "failed", disk+": "+err.Error())
+			add("storage", "File storage", "failed", disk+": "+err.Error())
 		} else {
 			_ = d.Delete(name)
-			add("storage", "فضای فایل", "ok", disk+": نوشتنی")
+			add("storage", "File storage", "ok", disk+": writable")
 		}
 	}
 
@@ -481,18 +481,18 @@ func (pl *Plugin) checks() []Check {
 		if total > 0 && free/total < 0.1 {
 			status = "warning"
 		}
-		add("disk", "فضای دیسک", status, fmt.Sprintf("%.1f گیگابایت آزاد از %.1f", free/(1<<30), total/(1<<30)))
+		add("disk", "Disk space", status, fmt.Sprintf("%.1f GB free of %.1f", free/(1<<30), total/(1<<30)))
 	}
 
 	var mem runtime.MemStats
 	runtime.ReadMemStats(&mem)
-	add("memory", "حافظه", "ok", fmt.Sprintf("%.1f مگابایت در استفاده، %d goroutine", float64(mem.Alloc)/(1<<20), runtime.NumGoroutine()))
+	add("memory", "Memory", "ok", fmt.Sprintf("%.1f MB in use, %d goroutines", float64(mem.Alloc)/(1<<20), runtime.NumGoroutine()))
 
 	if pl.Debug {
-		add("debug", "حالت اشکال‌زدایی", "warning", "روشن است؛ در محیط واقعی خاموش کنید (جزئیات خطا نشان داده می‌شود).")
+		add("debug", "Debug mode", "warning", "Debug is on; turn it off in production (error details are shown).")
 	} else {
-		add("debug", "حالت اشکال‌زدایی", "ok", "خاموش")
+		add("debug", "Debug mode", "ok", "Off")
 	}
-	add("runtime", "Go", "ok", fmt.Sprintf("%s، %s/%s، روشن از %s پیش", runtime.Version(), runtime.GOOS, runtime.GOARCH, time.Since(pl.started).Round(time.Second)))
+	add("runtime", "Go", "ok", fmt.Sprintf("%s, %s/%s, up for %s", runtime.Version(), runtime.GOOS, runtime.GOARCH, time.Since(pl.started).Round(time.Second)))
 	return out
 }

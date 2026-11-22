@@ -84,7 +84,7 @@ var choices = map[string][]string{
 func parseLook(raw any) (*Look, error) {
 	m, ok := raw.(map[string]any)
 	if !ok {
-		return nil, mks.ValidationErrors{"look": "ظاهر معتبر نیست."}
+		return nil, mks.ValidationErrors{"look": "Invalid appearance."}
 	}
 	var l Look
 	fields := map[string]*string{"preset": &l.Preset, "primary": &l.Primary, "mode": &l.Mode, "rail": &l.Rail,
@@ -99,7 +99,7 @@ func parseLook(raw any) (*Look, error) {
 			continue
 		}
 		if !slices.Contains(choices[k], s) {
-			return nil, mks.ValidationErrors{"look": fmt.Sprintf("مقدار «%s» برای %s معتبر نیست.", s, k)}
+			return nil, mks.ValidationErrors{"look": fmt.Sprintf("Invalid value \"%s\" for %s.", s, k)}
 		}
 		*dst = s
 	}
@@ -192,27 +192,27 @@ func (pl *Plugin) handle(ctx *mks.PageContext) (*mks.ActionResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		return mks.Success("ظاهر شما ذخیره شد."), pl.put(ctx.Query, user, *l)
+		return mks.Success("Your appearance saved."), pl.put(ctx.Query, user, *l)
 	case "reset_user":
 		_, err := ctx.Query.Exec("DELETE FROM "+Table+" WHERE scope = ?", user)
-		return mks.Success("ظاهر شما به ظاهر سازمان برگشت."), err
+		return mks.Success("Your appearance was reset to the organization's."), err
 	case "save_company":
 		if !manage {
-			return nil, mks.Reject("اجازهٔ تغییر ظاهر سازمان را ندارید.")
+			return nil, mks.Reject("You are not allowed to change the organization's appearance.")
 		}
 		l, err := parseLook(ctx.Data["look"])
 		if err != nil {
 			return nil, err
 		}
-		return mks.Success("ظاهر سازمان ذخیره شد."), pl.put(ctx.Query, "company", *l)
+		return mks.Success("Organization appearance saved."), pl.put(ctx.Query, "company", *l)
 	case "save_named":
 		if !manage {
-			return nil, mks.Reject("اجازهٔ ذخیرهٔ ظاهرهای نام‌دار را ندارید.")
+			return nil, mks.Reject("You are not allowed to save named appearances.")
 		}
 		name, _ := ctx.Data["name"].(string)
 		name = strings.TrimSpace(name)
 		if name == "" || utf8.RuneCountInString(name) > 40 {
-			return nil, mks.ValidationErrors{"name": "نام لازم است (حداکثر ۴۰ نویسه)."}
+			return nil, mks.ValidationErrors{"name": "The name is required (at most 40 characters)."}
 		}
 		l, err := parseLook(ctx.Data["look"])
 		if err != nil {
@@ -223,18 +223,18 @@ func (pl *Plugin) handle(ctx *mks.PageContext) (*mks.ActionResult, error) {
 			return nil, err
 		}
 		if n >= MaxSaved {
-			return nil, mks.ValidationErrors{"name": fmt.Sprintf("حداکثر %d ظاهر نام‌دار.", MaxSaved)}
+			return nil, mks.ValidationErrors{"name": fmt.Sprintf("At most %d named appearances.", MaxSaved)}
 		}
-		return mks.Success(fmt.Sprintf("ظاهر «%s» ذخیره شد.", name)), pl.put(ctx.Query, "saved:"+name, *l)
+		return mks.Success(fmt.Sprintf("Appearance \"%s\" saved.", name)), pl.put(ctx.Query, "saved:"+name, *l)
 	case "delete_named":
 		if !manage {
-			return nil, mks.Reject("اجازهٔ حذف ظاهرهای نام‌دار را ندارید.")
+			return nil, mks.Reject("You are not allowed to delete named appearances.")
 		}
 		name, _ := ctx.Data["name"].(string)
 		_, err := ctx.Query.Exec("DELETE FROM "+Table+" WHERE scope = ?", "saved:"+name)
-		return mks.Success("ظاهر حذف شد."), err
+		return mks.Success("Appearance deleted."), err
 	}
-	return nil, mks.Reject("کار نامعتبر.")
+	return nil, mks.Reject("Invalid action.")
 }
 
 func (pl *Plugin) put(q orm.Query, scope string, l Look) error {

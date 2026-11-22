@@ -139,12 +139,12 @@ func (pl *Plugin) checkPost(ctx *mks.HookContext, data map[string]any, stored *P
 		data["author_id"] = strings.TrimSpace(fmt.Sprint(v))
 		author := data["author_id"].(string)
 		if len(author) > 64 {
-			return mks.ValidationErrors{"author_id": "نویسنده معتبر نیست."}
+			return mks.ValidationErrors{"author_id": "Invalid author."}
 		}
 		// Crediting someone else: they must be an author of this site.
 		unchanged := stored != nil && stored.AuthorID != nil && *stored.AuthorID == author
 		if !unchanged && author != fmt.Sprint(ctx.UserID()) && pl.AuthorAllowed != nil && !pl.AuthorAllowed(siteID, author) {
-			return mks.ValidationErrors{"author_id": "این کاربر نویسندهٔ این سایت نیست."}
+			return mks.ValidationErrors{"author_id": "This user is not an author of this site."}
 		}
 	}
 	status, _ := data["status"].(string)
@@ -218,7 +218,7 @@ func (pl *Plugin) autoSlug(model any, data map[string]any) error {
 			return nil
 		}
 	}
-	return mks.ValidationErrors{"slug": "نامک را خودتان بنویسید."}
+	return mks.ValidationErrors{"slug": "Write the slug yourself."}
 }
 
 // asciiSlug keeps a-z and 0-9 of s, joining the rest with single hyphens (60 at most).
@@ -266,7 +266,7 @@ func (pl *Plugin) uniqueSlug(model any, siteID any, id uint, data map[string]any
 		return nil
 	}
 	if siteID == nil {
-		return mks.Reject("سایت فعال لازم است.")
+		return mks.Reject("An active site is required.")
 	}
 	q := pl.query().Model(model).Where("site_id = ? AND slug = ?", siteID, slug)
 	if id != 0 {
@@ -277,7 +277,7 @@ func (pl *Plugin) uniqueSlug(model any, siteID any, id uint, data map[string]any
 		return err
 	}
 	if n > 0 {
-		return mks.ValidationErrors{"slug": "این نامک در این سایت قبلاً استفاده شده است."}
+		return mks.ValidationErrors{"slug": "This slug is already used on this site."}
 	}
 	return nil
 }
@@ -390,17 +390,17 @@ func (pl *Plugin) checkCategory(data map[string]any, stored *Category) error {
 	}
 	parent, ok := toUint(raw)
 	if !ok {
-		return mks.ValidationErrors{"parent_id": "دسته‌بندی والد معتبر نیست."}
+		return mks.ValidationErrors{"parent_id": "Invalid parent category."}
 	}
 	data["parent_id"] = parent
 	// Walk up from the new parent; meeting this category means a cycle.
 	seen := map[uint]bool{}
 	for current := parent; current != 0; {
 		if id != 0 && current == id {
-			return mks.ValidationErrors{"parent_id": "دسته‌بندی نمی‌تواند زیرمجموعهٔ خودش یا فرزندانش باشد."}
+			return mks.ValidationErrors{"parent_id": "A category cannot be inside itself or its descendants."}
 		}
 		if seen[current] {
-			return mks.ValidationErrors{"parent_id": "ساختار دسته‌بندی‌ها حلقه دارد."}
+			return mks.ValidationErrors{"parent_id": "The category tree has a loop."}
 		}
 		seen[current] = true
 		var rows []Category
@@ -408,7 +408,7 @@ func (pl *Plugin) checkCategory(data map[string]any, stored *Category) error {
 			return err
 		}
 		if len(rows) == 0 {
-			return mks.ValidationErrors{"parent_id": "دسته‌بندی والد در این سایت پیدا نشد."}
+			return mks.ValidationErrors{"parent_id": "The parent category was not found on this site."}
 		}
 		if rows[0].ParentID == nil {
 			break
@@ -560,7 +560,7 @@ func (pl *Plugin) checkMediaPath(siteID any, data map[string]any, field string) 
 	}
 	p, ok := raw.(string)
 	if !ok {
-		return mks.ValidationErrors{field: "مقدار نامعتبر است."}
+		return mks.ValidationErrors{field: "Invalid value."}
 	}
 	if p = strings.TrimSpace(p); p == "" {
 		data[field] = nil
@@ -571,7 +571,7 @@ func (pl *Plugin) checkMediaPath(siteID any, data map[string]any, field string) 
 		return err
 	}
 	if n == 0 {
-		return mks.ValidationErrors{field: "این فایل در کتابخانهٔ رسانهٔ سایت نیست."}
+		return mks.ValidationErrors{field: "This file is not in the site's media library."}
 	}
 	data[field] = p
 	return nil

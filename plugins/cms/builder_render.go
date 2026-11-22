@@ -418,7 +418,7 @@ var blockTemplate = template.Must(template.Must(template.New("blocks").Parse(pic
 {{define "block-image"}}<figure class="pb pb-image size-{{.D.size}} al-{{.D.alignment}}{{if .D.rounded}} rounded{{end}}{{if .D.shadow}} shadow{{end}} {{.Class}}"{{template "open" .}}>{{with index .Img "image"}}{{template "picture" (.Sized "(max-width: 800px) 100vw, 48rem" "" true)}}{{end}}{{if .D.caption}}<figcaption>{{.D.caption}}</figcaption>{{end}}</figure>{{end}}
 {{define "block-video"}}<figure class="pb pb-media {{.Class}}"{{template "open" .}}><video src="{{index .Src "video"}}"{{if .D.controls}} controls{{end}}{{if .D.autoplay}} autoplay muted playsinline{{end}}{{if .D.loop}} loop{{end}} preload="metadata"></video>{{if .D.caption}}<figcaption>{{.D.caption}}</figcaption>{{end}}</figure>{{end}}
 {{define "block-audio"}}<figure class="pb pb-media {{.Class}}"{{template "open" .}}><audio src="{{index .Src "audio"}}"{{if .D.controls}} controls{{end}}{{if .D.autoplay}} autoplay{{end}}{{if .D.loop}} loop{{end}} preload="metadata"></audio>{{if .D.caption}}<figcaption>{{.D.caption}}</figcaption>{{end}}</figure>{{end}}
-{{define "block-slider"}}<div class="pb pb-slider sh-{{.D.height}} {{.Class}}"{{template "open" .}} data-slider data-speed="{{.D.autoplay_speed}}" data-autoplay="{{if .D.autoplay}}1{{else}}0{{end}}" role="region" aria-roledescription="carousel"><div class="track">{{range .Items}}<div class="slide" id="{{.ID}}">{{if .Img.Src}}{{template "picture" (.Img.Sized "100vw" "" true)}}{{end}}{{if or .D.title .D.subtitle .D.button_text}}<div class="cap">{{if .D.title}}<h3>{{.D.title}}</h3>{{end}}{{if .D.subtitle}}<p>{{.D.subtitle}}</p>{{end}}{{if and .D.button_text .URL}}<a class="btn btn-primary" href="{{.URL}}">{{.D.button_text}}</a>{{end}}</div>{{end}}</div>{{end}}</div>{{if .D.show_arrows}}<div class="arrows"><button type="button" data-go="-1" aria-label="قبلی">›</button><button type="button" data-go="1" aria-label="بعدی">‹</button></div>{{end}}{{if .D.show_dots}}<div class="dots">{{range .Items}}<a href="#{{.ID}}" aria-label="اسلاید"></a>{{end}}</div>{{end}}</div>{{end}}
+{{define "block-slider"}}<div class="pb pb-slider sh-{{.D.height}} {{.Class}}"{{template "open" .}} data-slider data-speed="{{.D.autoplay_speed}}" data-autoplay="{{if .D.autoplay}}1{{else}}0{{end}}" role="region" aria-roledescription="carousel"><div class="track">{{range .Items}}<div class="slide" id="{{.ID}}">{{if .Img.Src}}{{template "picture" (.Img.Sized "100vw" "" true)}}{{end}}{{if or .D.title .D.subtitle .D.button_text}}<div class="cap">{{if .D.title}}<h3>{{.D.title}}</h3>{{end}}{{if .D.subtitle}}<p>{{.D.subtitle}}</p>{{end}}{{if and .D.button_text .URL}}<a class="btn btn-primary" href="{{.URL}}">{{.D.button_text}}</a>{{end}}</div>{{end}}</div>{{end}}</div>{{if .D.show_arrows}}<div class="arrows"><button type="button" data-go="-1" aria-label="Previous">›</button><button type="button" data-go="1" aria-label="Next">‹</button></div>{{end}}{{if .D.show_dots}}<div class="dots">{{range .Items}}<a href="#{{.ID}}" aria-label="Slide"></a>{{end}}</div>{{end}}</div>{{end}}
 {{define "block-spacer"}}<div class="pb spacer-{{.D.size}} {{.Class}}" aria-hidden="true"{{template "open" .}}></div>{{end}}
 {{define "block-divider"}}<hr class="pb pb-divider {{.D.style}} w-{{.D.line_width}} al-{{.D.alignment}} {{.Class}}"{{template "open" .}}>{{end}}
 {{define "block-columns"}}<div class="pb cols gap-{{.D.gap}} va-{{.D.vertical_alignment}} stack-{{.D.stack_on_mobile}} {{.Class}}"{{if .Anchor}} id="{{.Anchor}}"{{end}} style="{{.Cols}}{{if .Style}};{{.Style}}{{end}}">{{range .Children}}<div>{{.}}</div>{{end}}</div>{{end}}
@@ -448,7 +448,7 @@ func (r *renderer) canvasList(blocks []Block, depth int, prefix string) (templat
 		if empty {
 			cls += " is-visible"
 		}
-		buf.WriteString(`<div class="` + cls + `" data-pb-insert="` + list + `|` + strconv.Itoa(i) + `" role="button" tabindex="0"><span class="mks-insert-pill"><span class="mks-plus">+</span><span class="mks-insert-label">کامپوننت اینجا اضافه شود</span></span></div>`)
+		buf.WriteString(`<div class="` + cls + `" data-pb-insert="` + list + `|` + strconv.Itoa(i) + `" role="button" tabindex="0"><span class="mks-insert-pill"><span class="mks-plus">+</span><span class="mks-insert-label">Add a component here</span></span></div>`)
 	}
 	for i, b := range blocks {
 		insert(i, false)
@@ -463,9 +463,9 @@ func (r *renderer) canvasList(blocks []Block, depth int, prefix string) (templat
 		}
 		name := html.EscapeString(label)
 		buf.WriteString(`<div class="mks-block" data-pb-path="` + path + `"><div class="mks-tools"><span class="mks-name" data-pb-drag>` + name + `</span>` +
-			`<button type="button" data-pb-act="edit" title="ویرایش">✎</button><button type="button" data-pb-act="up" title="انتقال به بالا">↑</button>` +
-			`<button type="button" data-pb-act="down" title="انتقال به پایین">↓</button><button type="button" data-pb-act="copy" title="کپی">⧉</button>` +
-			`<button type="button" data-pb-act="delete" title="حذف">×</button></div>`)
+			`<button type="button" data-pb-act="edit" title="Edit">✎</button><button type="button" data-pb-act="up" title="Move up">↑</button>` +
+			`<button type="button" data-pb-act="down" title="Move down">↓</button><button type="button" data-pb-act="copy" title="Copy">⧉</button>` +
+			`<button type="button" data-pb-act="delete" title="Delete">×</button></div>`)
 		buf.WriteString(string(h))
 		buf.WriteString(`</div>`)
 	}

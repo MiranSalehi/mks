@@ -64,7 +64,7 @@ func (pl *Plugin) coreSettings() map[string]SettingRule {
 		return func(_ *Plugin, _ any, v string) (string, string) {
 			v = strings.TrimSpace(v)
 			if utf8.RuneCountInString(v) > max {
-				return "", fmt.Sprintf("حداکثر %s نویسه.", faDigits(max))
+				return "", fmt.Sprintf("At most %s characters.", faDigits(max))
 			}
 			return v, ""
 		}
@@ -76,7 +76,7 @@ func (pl *Plugin) coreSettings() map[string]SettingRule {
 		}
 		n, err := pl.query().Model(&Media{}).Where("site_id = ? AND path = ?", siteID, v).Count()
 		if err != nil || n == 0 {
-			return "", "این فایل در کتابخانهٔ رسانهٔ سایت نیست."
+			return "", "This file is not in the site's media library."
 		}
 		return v, ""
 	}
@@ -90,7 +90,7 @@ func (pl *Plugin) coreSettings() map[string]SettingRule {
 			if v == "" || v == "shamsi" || v == "gregorian" {
 				return v, ""
 			}
-			return "", "تقویم باید شمسی یا میلادی باشد."
+			return "", "The calendar must be Jalali or Gregorian."
 		},
 		"front_page_id": func(pl *Plugin, siteID any, v string) (string, string) {
 			if strings.TrimSpace(v) == "" {
@@ -98,11 +98,11 @@ func (pl *Plugin) coreSettings() map[string]SettingRule {
 			}
 			id, err := strconv.ParseUint(v, 10, 64)
 			if err != nil {
-				return "", "برگه معتبر نیست."
+				return "", "Invalid page."
 			}
 			n, err := pl.query().Model(&Page{}).Where("site_id = ? AND id = ? AND deleted_at IS NULL", siteID, id).Count()
 			if err != nil || n == 0 {
-				return "", "این برگه در این سایت پیدا نشد."
+				return "", "This page was not found on this site."
 			}
 			return strconv.FormatUint(id, 10), ""
 		},
@@ -113,7 +113,7 @@ func (pl *Plugin) coreSettings() map[string]SettingRule {
 			case "1", "true":
 				return "1", ""
 			}
-			return "", "مقدار نامعتبر است."
+			return "", "Invalid value."
 		},
 		"page_cache_ttl_minutes": func(_ *Plugin, _ any, v string) (string, string) {
 			if v == "" {
@@ -121,7 +121,7 @@ func (pl *Plugin) coreSettings() map[string]SettingRule {
 			}
 			n, err := strconv.Atoi(v)
 			if err != nil || n < 1 || n > 10080 {
-				return "", "عددی بین ۱ تا ۱۰۰۸۰ دقیقه."
+				return "", "A number between 1 and 10080 minutes."
 			}
 			return strconv.Itoa(n), ""
 		},
@@ -138,7 +138,7 @@ func (pl *Plugin) coreSettings() map[string]SettingRule {
 				return v, ""
 			}
 		}
-		return "", "این پوسته وجود ندارد."
+		return "", "This skin does not exist."
 	}
 	rules["custom_css"] = func(_ *Plugin, _ any, v string) (string, string) { return customCSS(v) }
 	rules["custom_js"] = func(_ *Plugin, _ any, v string) (string, string) { return customJS(v) }
@@ -154,16 +154,16 @@ func permalinkRule(placeholder string) SettingRule {
 		}
 		v = cleanPattern(v)
 		if !patternRE.MatchString(v) {
-			return "", "فقط حروف کوچک انگلیسی، عدد، - و / مجاز است؛ با / شروع کنید."
+			return "", "Only lowercase letters, digits, - and / are allowed; start with /."
 		}
 		open := strings.Count(v, "{")
 		switch {
 		case placeholder == "" && open > 0:
-			return "", "این نشانی جای‌نگهداری ندارد."
+			return "", "This URL has no placeholder."
 		case placeholder != "" && (open != 1 || strings.Count(v, "{"+placeholder+"}") != 1):
-			return "", "نشانی باید دقیقاً یک {" + placeholder + "} داشته باشد."
+			return "", "The URL must contain exactly one {" + placeholder + "}."
 		case placeholder != "" && strings.Contains(v, "{"+placeholder+"}") && !strings.Contains(v, "/{"+placeholder+"}"):
-			return "", "{" + placeholder + "} باید یک بخش کامل نشانی باشد."
+			return "", "{" + placeholder + "} must be a complete URL segment."
 		}
 		return v, ""
 	}
@@ -343,7 +343,7 @@ func (pl *Plugin) saveSettings(ctx *mks.PageContext) (*mks.ActionResult, error) 
 		return nil, err
 	}
 	if site == nil {
-		return nil, mks.Reject("سایت فعال پیدا نشد.")
+		return nil, mks.Reject("Active site not found.")
 	}
 	rules := pl.settingRules()
 	clean := map[string]string{}
@@ -366,17 +366,17 @@ func (pl *Plugin) saveSettings(ctx *mks.PageContext) (*mks.ActionResult, error) 
 			// Lists and objects (extension settings) are stored as JSON for their rule.
 			raw, err := json.Marshal(v)
 			if err != nil || len(raw) > 65536 {
-				errs[key] = "مقدار نامعتبر است."
+				errs[key] = "Invalid value."
 				continue
 			}
 			text = string(raw)
 		default:
-			errs[key] = "مقدار نامعتبر است."
+			errs[key] = "Invalid value."
 			continue
 		}
 		// Custom JavaScript runs for every visitor: it needs its own ability.
 		if key == "custom_js" && !pl.canCode(ctx.HookContext) {
-			errs[key] = "اجازهٔ تغییر JavaScript سایت را ندارید."
+			errs[key] = "You are not allowed to change the site's JavaScript."
 			continue
 		}
 		value, msg := rule(pl, siteID, text)
@@ -399,7 +399,7 @@ func (pl *Plugin) saveSettings(ctx *mks.PageContext) (*mks.ActionResult, error) 
 			effective[k] = v
 		}
 		if other, dup := seen[effective[k]]; dup {
-			errs[k] = "با نشانی «" + other + "» یکی است."
+			errs[k] = "The URL \"" + other + "\" is the same."
 		}
 		seen[effective[k]] = k
 	}
@@ -437,7 +437,7 @@ func (pl *Plugin) saveSettings(ctx *mks.PageContext) (*mks.ActionResult, error) 
 		pl.bump(siteID)
 		pl.afterSettingsSaved(site)
 	})
-	return mks.Success("تنظیمات سایت ذخیره شد."), nil
+	return mks.Success("Site settings saved."), nil
 }
 
 // afterSettingsSaved: hook for caches that depend on settings (the page cache).

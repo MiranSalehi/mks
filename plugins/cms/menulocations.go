@@ -178,7 +178,7 @@ func (pl *Plugin) menuLocationsResource() mks.ModelResource[MenuLocation] {
 			}
 			id, ok := toUint(raw)
 			if !ok || id == 0 {
-				return mks.ValidationErrors{"menu_id": "منوی معتبری انتخاب کنید."}
+				return mks.ValidationErrors{"menu_id": "Select a valid menu."}
 			}
 			// Before hooks run outside the save's transaction (ctx.Query is nil).
 			n, err := pl.query().Model(&Menu{}).Where("id = ? AND site_id = ?", id, loc.SiteID).Count()
@@ -186,7 +186,7 @@ func (pl *Plugin) menuLocationsResource() mks.ModelResource[MenuLocation] {
 				return err
 			}
 			if n == 0 {
-				return mks.ValidationErrors{"menu_id": "این منو در این سایت نیست."}
+				return mks.ValidationErrors{"menu_id": "This menu is not on this site."}
 			}
 			data["menu_id"] = id
 			return nil

@@ -149,7 +149,7 @@ export function rolesResource(usersResource = 'users') {
 }
 
 /**
- * Roles and permissions: a "نقش‌ها" resource with a permission picker. Install the Go
+ * Roles and permissions: a "Roles" resource with a permission picker. Install the Go
  * plugin (access.Plugin) too.
  */
 export function access(options: { group?: string; usersResource?: string; navigationSort?: number } = {}): PanelPlugin {

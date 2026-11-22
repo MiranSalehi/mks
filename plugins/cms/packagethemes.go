@@ -31,16 +31,16 @@ var swatchRE = colorRE
 func checkTheme(raw []byte, files map[string][]byte) (*themeManifest, error) {
 	var m themeManifest
 	if err := json.Unmarshal(raw, &m); err != nil {
-		return nil, fmt.Errorf("theme.json معتبر نیست: %v", err)
+		return nil, fmt.Errorf("Invalid theme.json: %v", err)
 	}
 	if err := m.check(files); err != nil {
 		return nil, err
 	}
 	if m.Swatch != "" && !swatchRE.MatchString(m.Swatch) {
-		return nil, errors.New("رنگ (swatch) باید مثل #0a7f72 باشد")
+		return nil, errors.New("The swatch must look like #0a7f72")
 	}
 	if _, err := parseThemeTemplates(themeTemplateText(files)); err != nil {
-		return nil, fmt.Errorf("قالب‌های theme خطا دارند: %v", err)
+		return nil, fmt.Errorf("The theme files have errors: %v", err)
 	}
 	return &m, nil
 }

@@ -193,7 +193,7 @@ func (pl *Plugin) hooksPage() mks.Page {
 		Handle: func(ctx *mks.PageContext) (*mks.ActionResult, error) {
 			raw, _ := ctx.Data["hooks"].([]any)
 			if len(raw) > 1000 {
-				return nil, mks.ValidationErrors{"hooks": "بیش از اندازه."}
+				return nil, mks.ValidationErrors{"hooks": "Too large."}
 			}
 			known := map[hookKey]bool{}
 			for _, h := range pl.RegisteredHooks() {
@@ -206,7 +206,7 @@ func (pl *Plugin) hooksPage() mks.Page {
 				id, _ := m["id"].(string)
 				key := hookKey{kind, name, id}
 				if !known[key] {
-					return nil, mks.ValidationErrors{"hooks": fmt.Sprintf("ردیف %d: این hook ثبت نشده است.", i+1)}
+					return nil, mks.ValidationErrors{"hooks": fmt.Sprintf("Row %d: this hook is not registered.", i+1)}
 				}
 				enabled, ok := m["enabled"].(bool)
 				if !ok || strings.HasPrefix(id, "system.") {
@@ -215,7 +215,7 @@ func (pl *Plugin) hooksPage() mks.Page {
 				var priority *int
 				if v, ok := m["priority"].(float64); ok {
 					if v < -1000 || v > 1000 {
-						return nil, mks.ValidationErrors{"hooks": fmt.Sprintf("ردیف %d: اولویت بین ۱۰۰۰- و ۱۰۰۰ است.", i+1)}
+						return nil, mks.ValidationErrors{"hooks": fmt.Sprintf("Row %d: priority must be between -1000 and 1000.", i+1)}
 					}
 					p := int(v)
 					priority = &p
@@ -236,7 +236,7 @@ func (pl *Plugin) hooksPage() mks.Page {
 					pl.bump(id)
 				}
 			})
-			return mks.Success("تنظیم hookها ذخیره شد."), nil
+			return mks.Success("Hook settings saved."), nil
 		},
 	}
 }

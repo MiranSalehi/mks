@@ -62,7 +62,7 @@ export class CustomField<T = ResourceRecord, O extends object = Record<string, u
  * Makes a field factory for use in any form:
  *
  *	export const colorPicker = defineField({ component: ColorControl, defaults: { swatches: [...] }, empty: null })
- *	form: (f) => [f.textInput('name'), colorPicker<Category>('color').label('رنگ')]
+ *	form: (f) => [f.textInput('name'), colorPicker<Category>('color').label('Color')]
  */
 export function defineField<V, O extends object>(spec: { component: ComponentType<CustomFieldProps<V, O>>; defaults: O; empty?: V | null }) {
   return <T = ResourceRecord>(name: FieldName<T>) => new CustomField<T, O, V>(name, spec.component, { ...spec.defaults }, spec.empty ?? null)

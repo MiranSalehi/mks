@@ -433,7 +433,7 @@ func (n *builderNorm) blocks(raw any, path string, depth int) []Block {
 			list = append(list, map[string]any{"type": b.Type, "data": b.Data})
 		}
 	default:
-		n.errs[path] = "ساختار بلوک‌ها معتبر نیست."
+		n.errs[path] = "Invalid blocks structure."
 		return nil
 	}
 	out := make([]Block, 0, len(list))
@@ -441,7 +441,7 @@ func (n *builderNorm) blocks(raw any, path string, depth int) []Block {
 		bp := fmt.Sprintf("%s.%d", path, i)
 		obj, ok := item.(map[string]any)
 		if !ok {
-			n.errs[bp] = "ساختار بلوک معتبر نیست."
+			n.errs[bp] = "Invalid block structure."
 			continue
 		}
 		kind, _ := obj["type"].(string)
@@ -452,7 +452,7 @@ func (n *builderNorm) blocks(raw any, path string, depth int) []Block {
 		}
 		n.count++
 		if n.count > maxBuilderBlocks {
-			n.errs[path] = fmt.Sprintf("یک برگه حداکثر %s بلوک دارد.", faDigits(maxBuilderBlocks))
+			n.errs[path] = fmt.Sprintf("A page has at most %s blocks.", faDigits(maxBuilderBlocks))
 			return out
 		}
 		data, _ := obj["data"].(map[string]any)
@@ -464,7 +464,7 @@ func (n *builderNorm) blocks(raw any, path string, depth int) []Block {
 			clean[k] = v
 		}
 		if a, _ := clean["anchor"].(string); a != "" && !anchorRE.MatchString(a) {
-			n.errs[bp+".data.anchor"] = "لنگر: حروف کوچک انگلیسی، عدد، - و _؛ با حرف شروع شود."
+			n.errs[bp+".data.anchor"] = "Anchor: lowercase letters, digits, - and _; start with a letter."
 		}
 		if spec.Slots > 0 {
 			clean["children"] = n.slots(data["children"], spec, bp+".data.children", depth)
@@ -476,7 +476,7 @@ func (n *builderNorm) blocks(raw any, path string, depth int) []Block {
 
 func (n *builderNorm) slots(raw any, spec BlockSpec, path string, depth int) []any {
 	if depth+1 >= maxBuilderDepth {
-		n.errs[path] = "ستون‌ها بیش از اندازه تودرتو هستند."
+		n.errs[path] = "Columns are nested too deeply."
 		return nil
 	}
 	list, _ := raw.([]any)
@@ -508,7 +508,7 @@ func (n *builderNorm) fields(specs []fieldSpec, data map[string]any, path string
 				out[f.Name] = f.Default
 			}
 			if f.Required && f.Kind != fList {
-				n.errs[fp] = "این فیلد لازم است."
+				n.errs[fp] = "This field is required."
 			}
 			continue
 		}
@@ -516,23 +516,23 @@ func (n *builderNorm) fields(specs []fieldSpec, data map[string]any, path string
 		case fText, fTextarea:
 			s := strings.TrimSpace(fmt.Sprint(v))
 			if f.Max > 0 && utf8.RuneCountInString(s) > f.Max {
-				n.errs[fp] = fmt.Sprintf("حداکثر %s نویسه.", faDigits(f.Max))
+				n.errs[fp] = fmt.Sprintf("At most %s characters.", faDigits(f.Max))
 				continue
 			}
 			if s == "" && f.Required {
-				n.errs[fp] = "این فیلد لازم است."
+				n.errs[fp] = "This field is required."
 				continue
 			}
 			out[f.Name] = s
 		case fHTML:
 			s, _ := v.(string)
 			if f.Max > 0 && len(s) > f.Max*4 {
-				n.errs[fp] = "متن بیش از اندازه بلند است."
+				n.errs[fp] = "The text is too long."
 				continue
 			}
 			clean := mks.SanitizeHTML(s)
 			if f.Required && strings.TrimSpace(plainText(clean, 10)) == "" {
-				n.errs[fp] = "این فیلد لازم است."
+				n.errs[fp] = "This field is required."
 				continue
 			}
 			out[f.Name] = clean
@@ -545,7 +545,7 @@ func (n *builderNorm) fields(specs []fieldSpec, data map[string]any, path string
 		case fMedia:
 			s := strings.TrimSpace(fmt.Sprint(v))
 			if !n.mediaOK(s) {
-				n.errs[fp] = "این فایل در کتابخانهٔ رسانهٔ سایت نیست."
+				n.errs[fp] = "This file is not in the site's media library."
 				continue
 			}
 			out[f.Name] = s
@@ -578,41 +578,41 @@ func (n *builderNorm) fields(specs []fieldSpec, data map[string]any, path string
 			case string:
 				p, err := strconv.Atoi(strings.TrimSpace(x))
 				if err != nil {
-					n.errs[fp] = "عدد معتبر نیست."
+					n.errs[fp] = "Invalid number."
 					continue
 				}
 				num = p
 			default:
-				n.errs[fp] = "عدد معتبر نیست."
+				n.errs[fp] = "Invalid number."
 				continue
 			}
 			if num < f.Min || (f.Max > 0 && num > f.Max) {
-				n.errs[fp] = fmt.Sprintf("عددی بین %s و %s.", faDigits(f.Min), faDigits(f.Max))
+				n.errs[fp] = fmt.Sprintf("A number between %s and %s.", faDigits(f.Min), faDigits(f.Max))
 				continue
 			}
 			out[f.Name] = num
 		case fColor:
 			s := strings.TrimSpace(fmt.Sprint(v))
 			if !colorRE.MatchString(s) {
-				n.errs[fp] = "رنگ باید به شکل #rgb یا #rrggbb باشد."
+				n.errs[fp] = "The color must be #rgb or #rrggbb."
 				continue
 			}
 			out[f.Name] = s
 		case fList:
 			items, ok := v.([]any)
 			if !ok {
-				n.errs[fp] = "فهرست معتبر نیست."
+				n.errs[fp] = "Invalid list."
 				continue
 			}
 			if f.Max > 0 && len(items) > f.Max {
-				n.errs[fp] = fmt.Sprintf("حداکثر %s مورد.", faDigits(f.Max))
+				n.errs[fp] = fmt.Sprintf("At most %s items.", faDigits(f.Max))
 				continue
 			}
 			list := make([]any, 0, len(items))
 			for i, it := range items {
 				obj, _ := it.(map[string]any)
 				if obj == nil {
-					n.errs[fmt.Sprintf("%s.%d", fp, i)] = "مورد معتبر نیست."
+					n.errs[fmt.Sprintf("%s.%d", fp, i)] = "Invalid item."
 					continue
 				}
 				list = append(list, n.fields(f.Item, obj, fmt.Sprintf("%s.%d", fp, i)))

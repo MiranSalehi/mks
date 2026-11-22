@@ -65,7 +65,7 @@ type Locale struct {
 func (Locale) TableName() string { return LocalesTable }
 
 var builtIn = []Locale{
-	{Code: "fa", Name: "فارسی", Direction: "rtl", Base: "fa", Tag: "fa-IR", BuiltIn: true},
+	{Code: "fa", Name: "Persian", Direction: "rtl", Base: "fa", Tag: "fa-IR", BuiltIn: true},
 	{Code: "en", Name: "English", Direction: "ltr", Base: "en", Tag: "en-US", BuiltIn: true},
 }
 
@@ -209,12 +209,12 @@ func (pl *Plugin) saveTexts(q orm.Query, data map[string]any) (*mks.ActionResult
 		return nil, err
 	}
 	if !ok {
-		return nil, mks.ValidationErrors{"locale": "زبان معتبر نیست."}
+		return nil, mks.ValidationErrors{"locale": "Invalid language."}
 	}
 	if err := pl.save(q, locale, values); err != nil {
 		return nil, err
 	}
-	return mks.Success("متن‌ها ذخیره شد؛ برای دیدن تغییر، صفحه را تازه کنید."), nil
+	return mks.Success("Texts saved; refresh the page to see the change."), nil
 }
 
 // addLocale adds a language: code ("ckb", "ku", "ar_IQ"), name, direction, base and tag.
@@ -223,23 +223,23 @@ func (pl *Plugin) addLocale(q orm.Query, data map[string]any) (*mks.ActionResult
 	l := Locale{Code: str("code"), Name: str("name"), Direction: str("direction"), Base: str("base"), Tag: str("tag")}
 	errs := mks.ValidationErrors{}
 	if !codeRE.MatchString(l.Code) || len(l.Code) > 12 {
-		errs["code"] = "کد زبان دو یا سه حرف کوچک لاتین است، با بخش اختیاری مثل ar_IQ."
+		errs["code"] = "A language code is two or three lowercase Latin letters, with an optional part like ar_IQ."
 	} else if ok, err := pl.known(q, l.Code); err != nil {
 		return nil, err
 	} else if ok {
-		errs["code"] = "این زبان از قبل هست."
+		errs["code"] = "This language already exists."
 	}
 	if l.Name == "" || utf8.RuneCountInString(l.Name) > 60 {
-		errs["name"] = "نام زبان لازم است (حداکثر ۶۰ نویسه)."
+		errs["name"] = "The language name is required (at most 60 characters)."
 	}
 	if l.Direction != "rtl" && l.Direction != "ltr" {
-		errs["direction"] = "جهت نوشتن را انتخاب کنید."
+		errs["direction"] = "Choose a writing direction."
 	}
 	if !slices.Contains(Locales, l.Base) {
-		errs["base"] = "زبان پایه فارسی یا انگلیسی است."
+		errs["base"] = "The base language is Persian or English."
 	}
 	if l.Tag != "" && !tagRE.MatchString(l.Tag) {
-		errs["tag"] = "برچسب زبان معتبر نیست (مثل ckb-IQ)."
+		errs["tag"] = "Invalid language tag (e.g. ckb-IQ)."
 	}
 	if len(errs) > 0 {
 		return nil, errs
@@ -247,41 +247,41 @@ func (pl *Plugin) addLocale(q orm.Query, data map[string]any) (*mks.ActionResult
 	if err := q.Create(&l); err != nil {
 		return nil, err
 	}
-	return mks.Success(fmt.Sprintf("زبان «%s» اضافه شد؛ متن‌هایش را اینجا ترجمه کنید.", l.Name)), nil
+	return mks.Success(fmt.Sprintf("Language \"%s\" added; translate its texts here.", l.Name)), nil
 }
 
 // removeLocale deletes an added language and its texts.
 func (pl *Plugin) removeLocale(q orm.Query, data map[string]any) (*mks.ActionResult, error) {
 	code, _ := data["code"].(string)
 	if slices.Contains(Locales, code) {
-		return nil, mks.Reject("زبان‌های داخلی پنل حذف نمی‌شوند.")
+		return nil, mks.Reject("The panel's built-in languages cannot be deleted.")
 	}
 	res, err := q.Exec("DELETE FROM "+LocalesTable+" WHERE code = ?", code)
 	if err != nil {
 		return nil, err
 	}
 	if res == nil || res.RowsAffected == 0 {
-		return nil, mks.Reject("این زبان پیدا نشد.")
+		return nil, mks.Reject("This language was not found.")
 	}
 	if _, err := q.Exec("DELETE FROM "+Table+" WHERE locale = ?", code); err != nil {
 		return nil, err
 	}
-	return mks.Success("زبان و متن‌هایش حذف شد."), nil
+	return mks.Success("The language and its texts were deleted."), nil
 }
 
 // save writes the sent texts of a locale; an empty text goes back to the built-in one.
 func (pl *Plugin) save(q orm.Query, locale string, values map[string]any) error {
 	if len(values) > 2000 {
-		return mks.ValidationErrors{"values": "تعداد متن‌ها بیش از اندازه است."}
+		return mks.ValidationErrors{"values": "Too many strings."}
 	}
 	for key, raw := range values {
 		value, ok := raw.(string)
 		if !ok || !keyRE.MatchString(key) {
-			return mks.ValidationErrors{"values": fmt.Sprintf("کلید «%s» معتبر نیست.", key)}
+			return mks.ValidationErrors{"values": fmt.Sprintf("Invalid key \"%s\".", key)}
 		}
 		value = strings.TrimSpace(value)
 		if utf8.RuneCountInString(value) > 1000 {
-			return mks.ValidationErrors{"values": fmt.Sprintf("متن «%s» بیش از ۱۰۰۰ نویسه است.", key)}
+			return mks.ValidationErrors{"values": fmt.Sprintf("The text \"%s\" is longer than 1000 characters.", key)}
 		}
 		if _, err := q.Exec("DELETE FROM "+Table+" WHERE locale = ? AND name = ?", locale, key); err != nil {
 			return err

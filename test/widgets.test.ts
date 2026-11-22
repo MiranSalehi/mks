@@ -14,16 +14,16 @@ describe('widgets', () => {
   })
 
   it('formats chart labels', () => {
-    const c = w.chart('c').labels({ draft: 'پیش‌نویس' })
-    expect(chartLabel(c, 'draft')).toBe('پیش‌نویس')
+    const c = w.chart('c').labels({ draft: 'Draft' })
+    expect(chartLabel(c, 'draft')).toBe('Draft')
     expect(chartLabel(c, 'other')).toBe('other')
     expect(chartLabel(w.chart('m').formatLabels('month'), '2026-01')).toMatch(/ژانویه|ژانویهٔ/)
     expect(chartLabel(w.chart('d').formatLabels((l) => `#${l}`), '7')).toBe('#7')
   })
 
   it('describes stats', () => {
-    const st = w.stats('o').stats((b) => [b.make('views').label('بازدید').color('info').description('کل')])._stats[0]
-    expect([st.key, st._label, st._color, st._description]).toEqual(['views', 'بازدید', 'info', 'کل'])
+    const st = w.stats('o').stats((b) => [b.make('views').label('Views').color('info').description('Total')])._stats[0]
+    expect([st.key, st._label, st._color, st._description]).toEqual(['views', 'Views', 'info', 'Total'])
     expect(w.chart('c').poll(30)._poll).toBe(30)
   })
 })

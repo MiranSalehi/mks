@@ -213,7 +213,7 @@ func (pl *Plugin) checkEntry(data map[string]any, stored *Entry, key string) err
 			return err
 		}
 		if n > 0 {
-			return mks.ValidationErrors{"slug": "این نامک در این نوع محتوا قبلاً استفاده شده است."}
+			return mks.ValidationErrors{"slug": "This slug is already used for this content type."}
 		}
 	}
 	if err := pl.checkMediaPath(siteID, data, "featured_image"); err != nil {
@@ -284,7 +284,7 @@ func (pl *Plugin) showEntryArchive(req *request, ct ContentType) (http.Response,
 	}
 	base := pl.SiteURL(req.site.Slug) + ct.ArchiveURI
 	return pl.html(req, layoutView{Title: documentTitle(ct.Plural, nil, req.site), Canonical: safeURL(base),
-		List: &listView{Heading: ct.Plural, Items: items, Pagination: pagination(base, req.page, total), Empty: "هنوز موردی منتشر نشده است."}}, false)
+		List: &listView{Heading: ct.Plural, Items: items, Pagination: pagination(base, req.page, total), Empty: "Nothing has been published yet."}}, false)
 }
 
 func (pl *Plugin) showEntry(req *request, ct ContentType, slug string) (http.Response, error) {

@@ -174,7 +174,7 @@ function MediaPickerControl({ id, value, onChange, disabled, invalid, options, a
  * A field that picks a file from the media library (or uploads one into it). The value is
  * the file's path; the server checks it belongs to the site's library.
  *
- *	mediaPicker<Post>('featured_image').label('تصویر شاخص')
+ *	mediaPicker<Post>('featured_image').label('Featured image')
  */
 export const mediaPicker = defineField<string | null, PickerOptions>({ component: MediaPickerControl, defaults: { accept: 'image' }, empty: null })
 
@@ -279,6 +279,6 @@ function MediaGalleryControl({ id, value, onChange, disabled, invalid, options, 
  * An ordered collection of library files (MKSine's media attachments). The value is the
  * media ids; the server checks they are the site's and stores them in order.
  *
- *	mediaGallery<Post>('gallery').label('گالری')
+ *	mediaGallery<Post>('gallery').label('Gallery')
  */
 export const mediaGallery = defineField<number[], PickerOptions>({ component: MediaGalleryControl, defaults: { accept: 'image' }, empty: [] })

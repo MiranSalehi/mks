@@ -123,14 +123,14 @@ var packageExts = map[string]bool{
 // manifest), checked against path tricks, links, unknown types and size bombs.
 func readPackage(data []byte, manifest string) (map[string][]byte, error) {
 	if len(data) > MaxPackageSize {
-		return nil, fmt.Errorf("فایل بزرگ‌تر از %d مگابایت است", MaxPackageSize>>20)
+		return nil, fmt.Errorf("The file is larger than %d MB", MaxPackageSize>>20)
 	}
 	zr, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
-		return nil, errors.New("فایل ZIP معتبر نیست")
+		return nil, errors.New("Invalid ZIP file")
 	}
 	if len(zr.File) > maxPackageEntries {
-		return nil, fmt.Errorf("فایل ZIP بیش از %d فایل دارد", maxPackageEntries)
+		return nil, fmt.Errorf("The ZIP has more than %d files", maxPackageEntries)
 	}
 	files := map[string][]byte{}
 	var total int64
@@ -143,34 +143,34 @@ func readPackage(data []byte, manifest string) (map[string][]byte, error) {
 			continue
 		}
 		if f.Mode().Type() != 0 { // links, devices, pipes
-			return nil, fmt.Errorf("پیوند و فایل ویژه پذیرفته نیست: %s", name)
+			return nil, fmt.Errorf("Links and special files are not accepted: %s", name)
 		}
 		clean, ok := cleanPackagePath(name)
 		if !ok {
-			return nil, fmt.Errorf("مسیر نامعتبر در ZIP: %s", name)
+			return nil, fmt.Errorf("Invalid path in the ZIP: %s", name)
 		}
 		if !packageExts[strings.ToLower(path.Ext(clean))] {
-			return nil, fmt.Errorf("این نوع فایل پذیرفته نیست: %s", clean)
+			return nil, fmt.Errorf("This file type is not accepted: %s", clean)
 		}
 		if f.UncompressedSize64 > maxPackageFile {
-			return nil, fmt.Errorf("فایل %s بیش از اندازه بزرگ است", clean)
+			return nil, fmt.Errorf("File %s is too large", clean)
 		}
 		rc, err := f.Open()
 		if err != nil {
-			return nil, fmt.Errorf("خواندن %s ممکن نشد", clean)
+			return nil, fmt.Errorf("Could not read %s", clean)
 		}
 		// The sizes in the ZIP may lie: read at most one byte past the limits.
 		body, err := io.ReadAll(io.LimitReader(rc, maxPackageFile+1))
 		rc.Close()
 		if err != nil {
-			return nil, fmt.Errorf("خواندن %s ممکن نشد", clean)
+			return nil, fmt.Errorf("Could not read %s", clean)
 		}
 		total += int64(len(body))
 		if len(body) > maxPackageFile || total > maxPackageUnpacked {
-			return nil, errors.New("محتوای ZIP بیش از اندازه بزرگ است")
+			return nil, errors.New("The ZIP content is too large")
 		}
 		if _, dup := files[clean]; dup {
-			return nil, fmt.Errorf("فایل تکراری در ZIP: %s", clean)
+			return nil, fmt.Errorf("Duplicate file in the ZIP: %s", clean)
 		}
 		files[clean] = body
 	}
@@ -185,7 +185,7 @@ func readPackage(data []byte, manifest string) (map[string][]byte, error) {
 		}
 	}
 	if len(roots) != 1 {
-		return nil, fmt.Errorf("فایل %s در ریشهٔ ZIP پیدا نشد", manifest)
+		return nil, fmt.Errorf("File %s was not found at the ZIP root", manifest)
 	}
 	out := map[string][]byte{}
 	for p, body := range files {
@@ -283,42 +283,42 @@ var locationKeyRE = regexp.MustCompile(`^[a-z][a-z0-9_-]{0,49}$`)
 func (m *manifestBase) check(files map[string][]byte) error {
 	m.ID, m.Name, m.Version = strings.TrimSpace(m.ID), strings.TrimSpace(m.Name), strings.TrimSpace(m.Version)
 	if !packageIDRE.MatchString(m.ID) {
-		return errors.New("شناسه (id) باید با حرف کوچک انگلیسی، عدد و خط تیره باشد")
+		return errors.New("The id must use lowercase letters, digits and dashes")
 	}
 	if m.Name == "" || len(m.Name) > 120 {
-		return errors.New("نام (name) لازم است و حداکثر ۱۲۰ نویسه")
+		return errors.New("The name is required and at most 120 characters")
 	}
 	if !packageVersionRE.MatchString(m.Version) {
-		return errors.New("نسخه (version) باید مثل 1.0.0 باشد")
+		return errors.New("The version must look like 1.0.0")
 	}
 	if len(m.Description) > 1000 || len(m.Author) > 120 {
-		return errors.New("توضیح یا نام سازنده بیش از اندازه بلند است")
+		return errors.New("The author name or description is too long")
 	}
 	for _, r := range m.Requires {
 		if !packageIDRE.MatchString(r) {
-			return fmt.Errorf("وابستگی نامعتبر: %s", r)
+			return fmt.Errorf("Invalid dependency: %s", r)
 		}
 	}
 	for _, list := range [][]string{m.Assets.CSS, m.Assets.JS} {
 		for _, f := range list {
 			if _, ok := files[f]; !ok || !strings.HasPrefix(f, "assets/") {
-				return fmt.Errorf("فایل %s در پوشهٔ assets پیدا نشد", f)
+				return fmt.Errorf("File %s was not found in the assets folder", f)
 			}
 		}
 	}
 	for _, f := range m.Assets.CSS {
 		if bytes.Contains(bytes.ToLower(files[f]), []byte("</style")) {
-			return fmt.Errorf("CSS نمی‌تواند تگ style ببندد: %s", f)
+			return fmt.Errorf("CSS cannot close a style tag: %s", f)
 		}
 	}
 	if m.Screenshot != "" {
 		if _, ok := files[m.Screenshot]; !ok {
-			return fmt.Errorf("تصویر %s پیدا نشد", m.Screenshot)
+			return fmt.Errorf("Image %s not found", m.Screenshot)
 		}
 	}
 	for _, l := range m.Locations {
 		if !locationKeyRE.MatchString(l.Key) || strings.TrimSpace(l.Label) == "" {
-			return fmt.Errorf("موقعیت منوی نامعتبر: %s", l.Key)
+			return fmt.Errorf("Invalid menu location: %s", l.Key)
 		}
 	}
 	return nil
@@ -344,7 +344,7 @@ func packageDir(kind, id, version string) string {
 func (pl *Plugin) writePackageFiles(kind, id, version string, files map[string][]byte) error {
 	d := pl.packagesDriver()
 	if d == nil {
-		return errors.New("فضای فایل تنظیم نشده است")
+		return errors.New("File storage is not configured")
 	}
 	dir := packageDir(kind, id, version)
 	_ = d.DeleteDirectory(dir)
@@ -517,7 +517,7 @@ func (pl *Plugin) markBootFailed(r Package, cause error) {
 	msg := cause.Error()
 	now := time.Now()
 	pl.logf("cms: plugin %s turned off: %s", r.PackageID, msg)
-	log := appendLog(r.Log.V, "error", "راه‌اندازی نشد و خاموش شد: "+msg)
+	log := appendLog(r.Log.V, "error", "Failed to start and was turned off: "+msg)
 	if _, err := pl.query().Model(&Package{}).Where("id = ?", r.ID).Update(map[string]any{
 		"status": StatusInactive, "boot_error": msg, "boot_failed_at": now, "deactivated_at": now, "log": mks.NewJSON(log),
 	}); err != nil {
@@ -546,7 +546,7 @@ func (pl *Plugin) installPackage(kind string, data []byte, update, force bool) (
 	raw := files[manifestName]
 	var manifest map[string]any
 	if err := json.Unmarshal(raw, &manifest); err != nil {
-		return nil, mks.Reject(manifestName + " معتبر نیست: " + err.Error())
+		return nil, mks.Reject(manifestName + " is invalid: " + err.Error())
 	}
 	var base manifestBase
 	if kind == KindTheme {
@@ -557,7 +557,7 @@ func (pl *Plugin) installPackage(kind string, data []byte, update, force bool) (
 		base = t.manifestBase
 		for _, code := range pl.codeThemes() {
 			if code.ID == base.ID {
-				return nil, mks.Reject("قالبی با این شناسه در خود سامانه هست و از ZIP جایگزین نمی‌شود.")
+				return nil, mks.Reject("A theme with this id ships with the system and is not replaced from a ZIP.")
 			}
 		}
 	} else {
@@ -575,9 +575,9 @@ func (pl *Plugin) installPackage(kind string, data []byte, update, force bool) (
 	now := time.Now()
 	switch {
 	case !update && len(existing) > 0:
-		return nil, mks.Reject(fmt.Sprintf("«%s» نصب است؛ برای نسخهٔ تازه «به‌روزرسانی» را بزنید.", base.ID))
+		return nil, mks.Reject(fmt.Sprintf("\"%s\" is installed; use \"Update\" for a newer version.", base.ID))
 	case update && len(existing) == 0:
-		return nil, mks.Reject(fmt.Sprintf("«%s» نصب نیست؛ اول آن را بارگذاری کنید.", base.ID))
+		return nil, mks.Reject(fmt.Sprintf("\"%s\" is not installed; upload it first.", base.ID))
 	}
 	if !update {
 		if err := pl.writePackageFiles(kind, base.ID, base.Version, files); err != nil {
@@ -585,7 +585,7 @@ func (pl *Plugin) installPackage(kind string, data []byte, update, force bool) (
 		}
 		status := StatusInstalled
 		row := Package{Kind: kind, PackageID: base.ID, Version: base.Version, Status: status, Manifest: mks.NewJSON(manifest),
-			Log: mks.NewJSON(appendLog(nil, "info", "نسخهٔ "+base.Version+" نصب شد.")), InstalledAt: &now}
+			Log: mks.NewJSON(appendLog(nil, "info", "Version "+base.Version+" installed.")), InstalledAt: &now}
 		if err := pl.query().Create(&row); err != nil {
 			_ = pl.packagesDriver().DeleteDirectory("packages/" + kind + "s/" + base.ID)
 			return nil, err
@@ -596,7 +596,7 @@ func (pl *Plugin) installPackage(kind string, data []byte, update, force bool) (
 
 	row := existing[0]
 	if c := compareVersions(base.Version, row.Version); c <= 0 && !force {
-		return nil, mks.Reject(fmt.Sprintf("نسخهٔ %s تازه‌تر از نسخهٔ نصب‌شده (%s) نیست؛ برای نصب دوباره «اجبار» را روشن کنید.", base.Version, row.Version))
+		return nil, mks.Reject(fmt.Sprintf("Version %s is not newer than the installed version (%s); turn on \"Force\" to install it anyway.", base.Version, row.Version))
 	}
 	if err := pl.writePackageFiles(kind, base.ID, base.Version, files); err != nil {
 		return nil, err
@@ -613,7 +613,7 @@ func (pl *Plugin) installPackage(kind string, data []byte, update, force bool) (
 	updates := map[string]any{
 		"version": base.Version, "previous_version": prev, "manifest": mks.NewJSON(manifest),
 		"boot_error": nil, "boot_failed_at": nil,
-		"log": mks.NewJSON(appendLog(row.Log.V, "info", fmt.Sprintf("از نسخهٔ %s به %s به‌روزرسانی شد.", previous, base.Version))),
+		"log": mks.NewJSON(appendLog(row.Log.V, "info", fmt.Sprintf("Updated from version %s to %s.", previous, base.Version))),
 	}
 	if _, err := pl.query().Model(&Package{}).Where("id = ?", row.ID).Update(updates); err != nil {
 		return nil, err
@@ -631,11 +631,11 @@ func (pl *Plugin) rollbackPackage(kind, id string) (*mks.ActionResult, error) {
 		return nil, err
 	}
 	if row.PreviousVersion == nil {
-		return nil, mks.Reject("نسخهٔ قبلی برای بازگشت نیست.")
+		return nil, mks.Reject("No previous version to roll back to.")
 	}
 	files, err := pl.readPackageFiles(kind, id, *row.PreviousVersion)
 	if err != nil || len(files) == 0 {
-		return nil, mks.Reject("فایل‌های نسخهٔ قبلی پیدا نشد.")
+		return nil, mks.Reject("The previous version's files were not found.")
 	}
 	manifestName := map[string]string{KindTheme: "theme.json", KindPlugin: "plugin.json"}[kind]
 	var manifest map[string]any
@@ -644,12 +644,12 @@ func (pl *Plugin) rollbackPackage(kind, id string) (*mks.ActionResult, error) {
 	if _, err := pl.query().Model(&Package{}).Where("id = ?", row.ID).Update(map[string]any{
 		"version": *row.PreviousVersion, "previous_version": current, "manifest": mks.NewJSON(manifest),
 		"boot_error": nil, "boot_failed_at": nil,
-		"log": mks.NewJSON(appendLog(row.Log.V, "info", fmt.Sprintf("از نسخهٔ %s به %s برگشت.", current, *row.PreviousVersion))),
+		"log": mks.NewJSON(appendLog(row.Log.V, "info", fmt.Sprintf("Rolled back from version %s to %s.", current, *row.PreviousVersion))),
 	}); err != nil {
 		return nil, err
 	}
 	pl.packagesChanged()
-	return mks.Success(fmt.Sprintf("به نسخهٔ %s برگشت.", *row.PreviousVersion)), nil
+	return mks.Success(fmt.Sprintf("Rolled back to version %s.", *row.PreviousVersion)), nil
 }
 
 func (pl *Plugin) packageRow(kind, id string) (*Package, error) {
@@ -658,7 +658,7 @@ func (pl *Plugin) packageRow(kind, id string) (*Package, error) {
 		return nil, err
 	}
 	if len(rows) == 0 {
-		return nil, mks.Reject("پیدا نشد.")
+		return nil, mks.Reject("Not found.")
 	}
 	return &rows[0], nil
 }

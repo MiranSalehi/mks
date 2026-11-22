@@ -75,7 +75,7 @@ func (pl *Plugin) mayAssign(ctx *mks.HookContext, r Role) bool {
 func (pl *Plugin) SetUserRoles(ctx *mks.HookContext, q orm.Query, user any, roleIDs []uint) error {
 	key := fmt.Sprint(user)
 	if key == "" || key == "0" || key == "<nil>" {
-		return mks.ValidationErrors{"roles": "کاربر معتبر نیست."}
+		return mks.ValidationErrors{"roles": "Invalid user."}
 	}
 	var roles []Role
 	if err := q.Model(&Role{}).Find(&roles); err != nil {
@@ -87,7 +87,7 @@ func (pl *Plugin) SetUserRoles(ctx *mks.HookContext, q orm.Query, user any, role
 	}
 	for _, id := range roleIDs {
 		if !known[id] {
-			return mks.ValidationErrors{"roles": "نقش انتخاب‌شده وجود ندارد."}
+			return mks.ValidationErrors{"roles": "The selected role does not exist."}
 		}
 	}
 	for _, r := range roles {
@@ -97,7 +97,7 @@ func (pl *Plugin) SetUserRoles(ctx *mks.HookContext, q orm.Query, user any, role
 			continue
 		}
 		if !pl.mayAssign(ctx, r) {
-			return mks.ValidationErrors{"roles": fmt.Sprintf("نقش «%s» مجوزهایی دارد که شما ندارید؛ نمی‌توانید آن را بدهید یا بگیرید.", r.Name)}
+			return mks.ValidationErrors{"roles": fmt.Sprintf("The role \"%s\" has permissions you do not have; you cannot grant or revoke it.", r.Name)}
 		}
 		users := slices.DeleteFunc(slices.Clone(r.Users.V), func(u string) bool { return u == key })
 		if want {

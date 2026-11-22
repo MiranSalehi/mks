@@ -20,7 +20,7 @@ export class Group<T = ResourceRecord> {
     return this
   }
 
-  /** Headings for values, e.g. { draft: 'پیش‌نویس' }. */
+  /** Headings for values, e.g. { draft: 'Draft' }. */
   titles(titles: Record<string, string>): this {
     this._titles = titles
     return this

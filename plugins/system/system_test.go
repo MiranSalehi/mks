@@ -41,7 +41,7 @@ func TestCappedOutput(t *testing.T) {
 	c := &capped{limit: 5}
 	_, _ = c.Write([]byte("abc"))
 	_, _ = c.Write([]byte("defgh"))
-	if got := c.String(); !strings.HasPrefix(got, "abcde") || !strings.Contains(got, "کوتاه") {
+	if got := c.String(); !strings.HasPrefix(got, "abcde") || !strings.Contains(got, "output truncated") {
 		t.Errorf("capped = %q", got)
 	}
 	if stripANSI("\x1b[32mok\x1b[0m") != "ok" {

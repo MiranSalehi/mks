@@ -43,11 +43,11 @@ type Theme struct {
 }
 
 // DefaultTheme is the built-in theme.
-var DefaultTheme = Theme{ID: "default", Name: "پیش‌فرض", Description: "روشن و ساده، با رنگ سبز.", CSS: themeCSS, Swatch: "#087e72"}
+var DefaultTheme = Theme{ID: "default", Name: "Default", Description: "Light and simple, with green.", CSS: themeCSS, Swatch: "#087e72"}
 
 // MagazineTheme is a second built-in theme: a darker header, serif titles and wider pages.
 var MagazineTheme = Theme{
-	ID: "magazine", Name: "مجله", Description: "سربرگ تیره، تیترهای درشت و فهرست کارت‌های بزرگ.", Swatch: "#1f2937",
+	ID: "magazine", Name: "Magazine", Description: "Dark header, large headings and a grid of large cards.", Swatch: "#1f2937",
 	CSS: strings.NewReplacer(
 		"--accent:#087e72", "--accent:#b4232a",
 		"--paper:#fbfcfa", "--paper:#f7f5f2",
@@ -58,7 +58,7 @@ var MagazineTheme = Theme{
 		".title{font-size:clamp(2rem,6vw,3.6rem);", ".title{font-family:Georgia,'Times New Roman',serif;font-size:clamp(2.2rem,7vw,4.2rem);",
 		".cards{display:grid;gap:1.25rem;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));", ".cards{display:grid;gap:2rem;grid-template-columns:repeat(auto-fill,minmax(20rem,1fr));",
 	).Replace(themeCSS),
-	Templates: `{{define "terms"}}<section><div class="eyebrow">فهرست</div><h1 class="title">{{.Heading}}</h1>{{if .Items}}<ul class="terms">{{range .Items}}<li style="padding-inline-start:{{.Depth}}.5rem"><a href="{{.URL}}">{{.Name}}</a>{{if .Count}}<span class="count">{{.Count}}</span>{{end}}</li>{{end}}</ul>{{else}}<p class="empty">موردی نیست.</p>{{end}}</section>{{end}}`,
+	Templates: `{{define "terms"}}<section><div class="eyebrow">Index</div><h1 class="title">{{.Heading}}</h1>{{if .Items}}<ul class="terms">{{range .Items}}<li style="padding-inline-start:{{.Depth}}.5rem"><a href="{{.URL}}">{{.Name}}</a>{{if .Count}}<span class="count">{{.Count}}</span>{{end}}</li>{{end}}</ul>{{else}}<p class="empty">Nothing here.</p>{{end}}</section>{{end}}`,
 }
 
 // themes are the code themes and the uploaded ones (an uploaded theme never replaces a
@@ -130,10 +130,10 @@ func (pl *Plugin) canCode(ctx *mks.HookContext) bool {
 func customCSS(v string) (string, string) {
 	v = strings.TrimSpace(v)
 	if len(v) > 50000 {
-		return "", "حداکثر ۵۰٬۰۰۰ نویسه."
+		return "", "At most 50,000 characters."
 	}
 	if strings.Contains(v, "<") {
-		return "", "CSS نمی‌تواند نشانه‌گذاری (<) داشته باشد."
+		return "", "CSS cannot contain markup (<)."
 	}
 	return v, ""
 }
@@ -142,11 +142,11 @@ func customCSS(v string) (string, string) {
 func customJS(v string) (string, string) {
 	v = strings.TrimSpace(v)
 	if len(v) > 50000 {
-		return "", "حداکثر ۵۰٬۰۰۰ نویسه."
+		return "", "At most 50,000 characters."
 	}
 	low := strings.ToLower(v)
 	if strings.Contains(low, "</script") || strings.Contains(low, "<!--") || strings.Contains(low, "<script") {
-		return "", "JavaScript نمی‌تواند تگ script یا توضیح HTML داشته باشد."
+		return "", "JavaScript cannot contain a script tag or an HTML comment."
 	}
 	return v, ""
 }

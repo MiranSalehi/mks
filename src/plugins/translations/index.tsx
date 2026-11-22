@@ -118,7 +118,7 @@ function AddLanguageModal({ locales, onClose }: { locales: CustomLocale[]; onClo
             {errors.code && <p className="text-xs text-danger-600" role="alert">{errors.code}</p>}
           </Field>
           <Field label={L('نام (به خود زبان)', 'Name (in the language)')} required>
-            <input className={input} value={form.name} onChange={set('name')} placeholder="کوردی" maxLength={60} />
+            <input className={input} value={form.name} onChange={set('name')} placeholder="Kurdish" maxLength={60} />
             {errors.name && <p className="text-xs text-danger-600" role="alert">{errors.name}</p>}
           </Field>
           <Field label={L('جهت نوشتن', 'Direction')} required>

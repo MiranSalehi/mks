@@ -230,7 +230,7 @@ func normalizeKeys(raw any, field string, known func(string) bool) ([]string, er
 		return []string{}, nil
 	}
 	if !ok {
-		return nil, mks.ValidationErrors{field: "مقدار باید فهرست باشد."}
+		return nil, mks.ValidationErrors{field: "The value must be a list."}
 	}
 	out := []string{}
 	for _, v := range list {
@@ -241,13 +241,13 @@ func normalizeKeys(raw any, field string, known func(string) bool) ([]string, er
 		case float64:
 			s = strings.TrimSuffix(fmt.Sprintf("%.0f", x), ".0")
 			if float64(int64(x)) != x {
-				return nil, mks.ValidationErrors{field: "مقدار نامعتبر است."}
+				return nil, mks.ValidationErrors{field: "Invalid value."}
 			}
 		default:
-			return nil, mks.ValidationErrors{field: "مقدار نامعتبر است."}
+			return nil, mks.ValidationErrors{field: "Invalid value."}
 		}
 		if s == "" || (known != nil && !known(s)) {
-			return nil, mks.ValidationErrors{field: fmt.Sprintf("«%s» شناخته‌شده نیست.", s)}
+			return nil, mks.ValidationErrors{field: fmt.Sprintf("\"%s\" is not recognized.", s)}
 		}
 		if !slices.Contains(out, s) {
 			out = append(out, s)

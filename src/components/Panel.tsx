@@ -58,7 +58,7 @@ export interface PanelProps {
   pages?: PageDefinition[]
   /** Feature bundles: their resources, pages, widgets and topbar items are added. */
   plugins?: PanelPlugin[]
-  /** What a tenant is called in the UI (multi-tenancy), e.g. "تیم". */
+  /** What a tenant is called in the UI (multi-tenancy), e.g. "Team". */
   tenantLabel?: string
   /** The order of the sidebar groups (and their icons); groups not listed come after. */
   navigationGroups?: NavigationGroupDefinition[]

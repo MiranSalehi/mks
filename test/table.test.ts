@@ -9,7 +9,7 @@ describe('groups', () => {
   const post: Post = { status: 'draft', category_id: 3, category: { name: 'DevOps' }, views: 5 }
 
   it('uses titles, a path or a function for headings', () => {
-    expect(g.make('status').titles({ draft: 'پیش‌نویس' }).titleOf(post)).toBe('پیش‌نویس')
+    expect(g.make('status').titles({ draft: 'Draft' }).titleOf(post)).toBe('Draft')
     expect(g.make('category_id').title('category.name').titleOf(post)).toBe('DevOps')
     expect(g.make('category_id').title((p) => `#${p.category_id}`).titleOf(post)).toBe('#3')
     expect(g.make('category_id').titleOf(post)).toBe('3')

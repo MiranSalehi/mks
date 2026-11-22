@@ -10,7 +10,7 @@ export interface PageDefinition {
   name: string
   label: string
   icon?: ReactNode
-  /** A navigation group heading, e.g. "گزارش‌ها". */
+  /** A navigation group heading, e.g. "Reports". */
   group?: string
   /** Order in its group (or cluster): lower first. */
   navigationSort?: number

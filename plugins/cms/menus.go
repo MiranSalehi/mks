@@ -111,7 +111,7 @@ func (pl *Plugin) validateMenu(data map[string]any, stored *Menu, lookups menuLo
 		siteID = stored.SiteID
 	}
 	if siteID == nil {
-		return mks.Reject("برای منو، سایت فعال لازم است.")
+		return mks.Reject("Menus need an active site.")
 	}
 	if name, ok := data["name"].(string); ok {
 		data["name"] = strings.TrimSpace(name)
@@ -176,18 +176,18 @@ func normalizeMenuItems(raw any) ([]MenuItem, mks.ValidationErrors) {
 func normalizeMenuList(raw any, path string, depth int, errs mks.ValidationErrors, count *int) []MenuItem {
 	list, ok := raw.([]any)
 	if !ok {
-		errs[path] = "ساختار آیتم‌های منو معتبر نیست."
+		errs[path] = "Invalid menu items structure."
 		return nil
 	}
 	if len(list) > maxMenuList {
-		errs[path] = fmt.Sprintf("هر سطح منو حداکثر %s آیتم دارد.", faDigits(maxMenuList))
+		errs[path] = fmt.Sprintf("Each menu level has at most %s items.", faDigits(maxMenuList))
 		return nil
 	}
 	items := make([]MenuItem, 0, len(list))
 	for i, rawItem := range list {
 		p := fmt.Sprintf("%s.%d", path, i)
 		if *count++; *count > maxMenuEntries {
-			errs["items"] = fmt.Sprintf("یک منو حداکثر %s آیتم دارد.", faDigits(maxMenuEntries))
+			errs["items"] = fmt.Sprintf("A menu has at most %s items.", faDigits(maxMenuEntries))
 			return nil
 		}
 		item, ok := normalizeMenuEntry(rawItem, p, errs)
@@ -200,7 +200,7 @@ func normalizeMenuList(raw any, path string, depth int, errs mks.ValidationError
 		case nil:
 		case []any:
 			if len(children) > 0 && depth >= MaxMenuDepth {
-				errs[p+".children"] = fmt.Sprintf("منو حداکثر %s سطح دارد.", faDigits(MaxMenuDepth))
+				errs[p+".children"] = fmt.Sprintf("A menu has at most %s levels.", faDigits(MaxMenuDepth))
 				childFailed = true
 				break
 			}
@@ -208,7 +208,7 @@ func normalizeMenuList(raw any, path string, depth int, errs mks.ValidationError
 			item.Children = normalizeMenuList(children, p+".children", depth+1, errs, count)
 			childFailed = len(errs) > before
 		default:
-			errs[p+".children"] = "ساختار زیرمنو معتبر نیست."
+			errs[p+".children"] = "Invalid submenu structure."
 			childFailed = true
 		}
 		if item.Children == nil {
@@ -216,7 +216,7 @@ func normalizeMenuList(raw any, path string, depth int, errs mks.ValidationError
 		}
 		// An empty group is an error of its own; with failed children those errors say enough.
 		if item.Type == "group" && len(item.Children) == 0 && !childFailed {
-			errs[p+".children"] = "گروه باید دست‌کم یک زیرمنو داشته باشد."
+			errs[p+".children"] = "A group must have at least one submenu."
 		}
 		items = append(items, item)
 	}
@@ -227,7 +227,7 @@ func normalizeMenuList(raw any, path string, depth int, errs mks.ValidationError
 func normalizeMenuEntry(raw any, path string, errs mks.ValidationErrors) (MenuItem, bool) {
 	obj, ok := raw.(map[string]any)
 	if !ok {
-		errs[path] = "ساختار آیتم منو معتبر نیست."
+		errs[path] = "Invalid menu item structure."
 		return MenuItem{}, false
 	}
 	valid := true
@@ -240,18 +240,18 @@ func normalizeMenuEntry(raw any, path string, errs mks.ValidationErrors) (MenuIt
 	switch {
 	case kind == "page", kind == "post", kind == "category", kind == "tag", kind == "link", kind == "group":
 	default:
-		fail("type", "نوع آیتم منو معتبر نیست.")
+		fail("type", "Invalid menu item type.")
 	}
 
 	label, isString := obj["label"].(string)
 	if obj["label"] != nil && !isString {
-		fail("label", "عنوان باید متن باشد.")
+		fail("label", "The title must be text.")
 	}
 	label = strings.TrimSpace(label)
 	if utf8.RuneCountInString(label) > maxMenuLabel {
-		fail("label", fmt.Sprintf("عنوان حداکثر %s نویسه است.", faDigits(maxMenuLabel)))
+		fail("label", fmt.Sprintf("The title is at most %s characters.", faDigits(maxMenuLabel)))
 	} else if label == "" && (kind == "link" || kind == "group") {
-		fail("label", "عنوان لازم است.")
+		fail("label", "The title is required.")
 	}
 
 	entry := MenuItem{Type: kind, Label: label}
@@ -277,9 +277,9 @@ func normalizeMenuEntry(raw any, path string, errs mks.ValidationErrors) (MenuIt
 		link = strings.TrimSpace(link)
 		switch {
 		case link == "":
-			fail("url", "نشانی لینک لازم است.")
+			fail("url", "The link URL is required.")
 		case !SafeLinkURL(link):
-			fail("url", "نشانی باید با https:// ،http:// ،mailto: ،tel: یا / شروع شود.")
+			fail("url", "The URL must start with https://, http://, mailto:, tel: or /.")
 		}
 		entry.URL = link
 		entry.NewTab, _ = obj["new_tab"].(bool)
@@ -288,15 +288,15 @@ func normalizeMenuEntry(raw any, path string, errs mks.ValidationErrors) (MenuIt
 }
 
 var refMissing = map[string]string{
-	"page": "یک برگه انتخاب کنید.", "post": "یک نوشته انتخاب کنید.",
-	"category": "یک دسته‌بندی انتخاب کنید.", "tag": "یک برچسب انتخاب کنید.",
+	"page": "Select a page.", "post": "Select a post.",
+	"category": "Select a category.", "tag": "Select a tag.",
 }
 
 var refNotFound = map[string]string{
-	"page":     "این برگه در این سایت پیدا نشد یا در زباله‌دان است.",
-	"post":     "این نوشته در این سایت پیدا نشد.",
-	"category": "این دسته‌بندی در این سایت پیدا نشد.",
-	"tag":      "این برچسب در این سایت پیدا نشد.",
+	"page":     "This page was not found on this site, or it is in the trash.",
+	"post":     "This post was not found on this site.",
+	"category": "This category was not found on this site.",
+	"tag":      "This tag was not found on this site.",
 }
 
 // menuPageID reads a record id sent as a JSON number or a numeric string.

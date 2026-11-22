@@ -89,27 +89,27 @@ func (pl *Plugin) pageActions() []mks.Action[Page] {
 
 func (pl *Plugin) duplicatePage(ctx *mks.ActionContext[Page]) (*mks.ActionResult, error) {
 	if ctx == nil || !pl.can(ctx.HookContext, ManagePages) {
-		return nil, mks.Reject("اجازهٔ کپی برگه را ندارید.")
+		return nil, mks.Reject("You are not allowed to copy pages.")
 	}
 	if ctx.Query == nil || len(ctx.Records) != 1 || ctx.Records[0] == nil {
-		return nil, mks.Reject("برای کپی دقیقاً یک برگه انتخاب کنید.")
+		return nil, mks.Reject("Select exactly one page to copy.")
 	}
 	original := ctx.Records[0]
 	if original.ID == 0 || original.SiteID == 0 || original.DeletedAt != nil {
-		return nil, mks.Reject("برگهٔ انتخاب‌شده معتبر نیست.")
+		return nil, mks.Reject("Invalid selected page.")
 	}
 	var locked Page
 	err := ctx.Query.Model(&Page{}).
 		Where("site_id = ? AND id = ? AND deleted_at IS NULL", original.SiteID, original.ID).
 		LockForUpdate().First(&locked)
 	if errors.Is(err, frameworkerrors.OrmRecordNotFound) {
-		return nil, mks.Reject("برگهٔ انتخاب‌شده یافت نشد.")
+		return nil, mks.Reject("Selected page not found.")
 	}
 	if err != nil {
 		return nil, fmt.Errorf("lock page for duplicate: %w", err)
 	}
 	if locked.ID != original.ID || locked.SiteID != original.SiteID || locked.DeletedAt != nil {
-		return nil, mks.Reject("برگهٔ انتخاب‌شده یافت نشد.")
+		return nil, mks.Reject("Selected page not found.")
 	}
 
 	// Actions bypass normal form sanitization. Validate and sanitize the locked
@@ -120,7 +120,7 @@ func (pl *Plugin) duplicatePage(ctx *mks.ActionContext[Page]) (*mks.ActionResult
 	}
 	blocks, errs := pl.NormalizeBuilder(fields.BuilderPayload, locked.SiteID, "builder_payload")
 	if len(errs) > 0 {
-		return nil, mks.Reject("محتوای بلوکی برگه معتبر نیست.")
+		return nil, mks.Reject("Invalid page block content.")
 	}
 	fields.BuilderPayload = blocks
 	slug, err := availablePageCopySlug(ctx, locked.SiteID, locked.Slug)
@@ -144,7 +144,7 @@ func (pl *Plugin) duplicatePage(ctx *mks.ActionContext[Page]) (*mks.ActionResult
 	if err := savePageRevision(ctx.HookContext, &copy); err != nil {
 		return nil, err
 	}
-	result := mks.Success("پیش‌نویس کپی‌شده ساخته شد.")
+	result := mks.Success("Copied draft created.")
 	result.Redirect = fmt.Sprintf("/pages/%d", copy.ID)
 	result.Invalidate = []string{"pages"}
 	return result, nil
@@ -174,7 +174,7 @@ func availablePageCopySlug(ctx *mks.ActionContext[Page], siteID uint, originalSl
 			return candidate, nil
 		}
 	}
-	return "", mks.Reject("ساخت نامک یکتا برای کپی برگه ممکن نشد.")
+	return "", mks.Reject("Could not build a unique slug for the page copy.")
 }
 
 func trimSlug(value string, max int) string {
@@ -193,14 +193,14 @@ func trimSlug(value string, max int) string {
 
 func (pl *Plugin) trashPage(ctx *mks.ActionContext[Page]) (*mks.ActionResult, error) {
 	if ctx == nil || !pl.can(ctx.HookContext, ManagePages) {
-		return nil, mks.Reject("اجازهٔ انتقال برگه به زباله‌دان را ندارید.")
+		return nil, mks.Reject("You are not allowed to move pages to the trash.")
 	}
 	if ctx.Query == nil || len(ctx.Records) != 1 || ctx.Records[0] == nil {
-		return nil, mks.Reject("برای انتقال به زباله‌دان دقیقاً یک برگه انتخاب کنید.")
+		return nil, mks.Reject("Select exactly one page to move to the trash.")
 	}
 	page := ctx.Records[0]
 	if page.ID == 0 || page.SiteID == 0 || page.DeletedAt != nil {
-		return nil, mks.Reject("برگهٔ انتخاب‌شده معتبر نیست.")
+		return nil, mks.Reject("Invalid selected page.")
 	}
 	deletedAt := time.Now()
 	updated, err := ctx.Query.Model(&Page{}).
@@ -210,9 +210,9 @@ func (pl *Plugin) trashPage(ctx *mks.ActionContext[Page]) (*mks.ActionResult, er
 		return nil, fmt.Errorf("trash page: %w", err)
 	}
 	if updated == nil || updated.RowsAffected != 1 {
-		return nil, mks.Reject("برگهٔ انتخاب‌شده یافت نشد یا تغییر کرده است.")
+		return nil, mks.Reject("The selected page was not found or it changed.")
 	}
-	result := mks.Success("برگه به زباله‌دان منتقل شد.")
+	result := mks.Success("Page moved to the trash.")
 	result.Redirect = "/page_trash"
 	result.Invalidate = []string{"pages", "page_trash"}
 	return result, nil
@@ -220,27 +220,27 @@ func (pl *Plugin) trashPage(ctx *mks.ActionContext[Page]) (*mks.ActionResult, er
 
 func (pl *Plugin) purgeTrashedPage(ctx *mks.ActionContext[PageTrash]) (*mks.ActionResult, error) {
 	if ctx == nil || !pl.can(ctx.HookContext, PurgePages) {
-		return nil, mks.Reject("اجازهٔ حذف دائمی برگه را ندارید.")
+		return nil, mks.Reject("You are not allowed to permanently delete pages.")
 	}
 	if ctx.Query == nil || len(ctx.Records) != 1 || ctx.Records[0] == nil {
-		return nil, mks.Reject("برای حذف دائمی دقیقاً یک برگه انتخاب کنید.")
+		return nil, mks.Reject("Select exactly one page to delete permanently.")
 	}
 	trashed := ctx.Records[0]
 	if trashed.ID == 0 || trashed.SiteID == 0 || trashed.DeletedAt == nil {
-		return nil, mks.Reject("برگهٔ انتخاب‌شده در زباله‌دان نیست.")
+		return nil, mks.Reject("The selected page is not in the trash.")
 	}
 	var current PageTrash
 	err := ctx.Query.Model(&PageTrash{}).
 		Where("site_id = ? AND id = ? AND deleted_at IS NOT NULL", trashed.SiteID, trashed.ID).
 		LockForUpdate().First(&current)
 	if errors.Is(err, frameworkerrors.OrmRecordNotFound) {
-		return nil, mks.Reject("برگه در زباله‌دان یافت نشد.")
+		return nil, mks.Reject("Page not found in the trash.")
 	}
 	if err != nil {
 		return nil, fmt.Errorf("lock trashed page for purge: %w", err)
 	}
 	if current.ID != trashed.ID || current.DeletedAt == nil || current.SiteID != trashed.SiteID {
-		return nil, mks.Reject("برگه در زباله‌دان یافت نشد.")
+		return nil, mks.Reject("Page not found in the trash.")
 	}
 	deleted, err := ctx.Query.Model(&PageTrash{}).
 		Where("site_id = ? AND id = ? AND deleted_at IS NOT NULL", current.SiteID, current.ID).
@@ -249,12 +249,12 @@ func (pl *Plugin) purgeTrashedPage(ctx *mks.ActionContext[PageTrash]) (*mks.Acti
 		return nil, fmt.Errorf("purge trashed page: %w", err)
 	}
 	if deleted == nil || deleted.RowsAffected != 1 {
-		return nil, mks.Reject("برگه در زباله‌دان یافت نشد یا تغییر کرده است.")
+		return nil, mks.Reject("The page was not found in the trash, or it changed.")
 	}
 	if err := dropAttachments(ctx.Query, OwnerPage, current.ID); err != nil {
 		return nil, fmt.Errorf("purge page attachments: %w", err)
 	}
-	result := mks.Success("برگه و تاریخچهٔ آن برای همیشه حذف شد.")
+	result := mks.Success("The page and its history were permanently deleted.")
 	result.Redirect = "/page_trash"
 	result.Invalidate = []string{"pages", "page_trash", "page_revisions"}
 	return result, nil
@@ -262,27 +262,27 @@ func (pl *Plugin) purgeTrashedPage(ctx *mks.ActionContext[PageTrash]) (*mks.Acti
 
 func (pl *Plugin) restoreTrashedPage(ctx *mks.ActionContext[PageTrash]) (*mks.ActionResult, error) {
 	if ctx == nil || !pl.can(ctx.HookContext, ManagePages) {
-		return nil, mks.Reject("اجازهٔ بازیابی برگه را ندارید.")
+		return nil, mks.Reject("You are not allowed to restore pages.")
 	}
 	if ctx.Query == nil || len(ctx.Records) != 1 || ctx.Records[0] == nil {
-		return nil, mks.Reject("برای بازیابی دقیقاً یک برگه انتخاب کنید.")
+		return nil, mks.Reject("Select exactly one page to restore.")
 	}
 	trashed := ctx.Records[0]
 	if trashed.ID == 0 || trashed.SiteID == 0 || trashed.DeletedAt == nil {
-		return nil, mks.Reject("برگهٔ انتخاب‌شده در زباله‌دان نیست.")
+		return nil, mks.Reject("The selected page is not in the trash.")
 	}
 	var current PageTrash
 	err := ctx.Query.Model(&PageTrash{}).
 		Where("site_id = ? AND id = ? AND deleted_at IS NOT NULL", trashed.SiteID, trashed.ID).
 		LockForUpdate().First(&current)
 	if errors.Is(err, frameworkerrors.OrmRecordNotFound) {
-		return nil, mks.Reject("برگه در زباله‌دان یافت نشد.")
+		return nil, mks.Reject("Page not found in the trash.")
 	}
 	if err != nil {
 		return nil, fmt.Errorf("lock trashed page: %w", err)
 	}
 	if current.ID != trashed.ID || current.DeletedAt == nil || current.SiteID != trashed.SiteID {
-		return nil, mks.Reject("برگه در زباله‌دان یافت نشد.")
+		return nil, mks.Reject("Page not found in the trash.")
 	}
 	// Keep the slug, content and publication metadata: restoring resumes the
 	// previous publication state, including a scheduled date that has now passed.
@@ -293,9 +293,9 @@ func (pl *Plugin) restoreTrashedPage(ctx *mks.ActionContext[PageTrash]) (*mks.Ac
 		return nil, fmt.Errorf("restore trashed page: %w", err)
 	}
 	if updated == nil || updated.RowsAffected != 1 {
-		return nil, mks.Reject("برگه در زباله‌دان یافت نشد یا تغییر کرده است.")
+		return nil, mks.Reject("The page was not found in the trash, or it changed.")
 	}
-	result := mks.Success("برگه بازیابی شد.")
+	result := mks.Success("Page restored.")
 	result.Redirect = "/pages"
 	result.Invalidate = []string{"pages", "page_trash"}
 	return result, nil

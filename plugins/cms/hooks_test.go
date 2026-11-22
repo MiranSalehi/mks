@@ -17,7 +17,7 @@ func TestEventsRunInPriorityOrderAndCanStop(t *testing.T) {
 	pl.On("post.creating", func(Event) error { got = append(got, "a"); return nil }, 1)
 	pl.On("post.creating", func(e Event) error {
 		if e.Data["title"] == "forbidden" {
-			return errors.New("نه")
+			return errors.New("no")
 		}
 		return nil
 	}, 20)
@@ -28,7 +28,7 @@ func TestEventsRunInPriorityOrderAndCanStop(t *testing.T) {
 		t.Fatalf("order = %v", got)
 	}
 	err := pl.beforeSave(nil, "post", 1, nil, map[string]any{"title": "forbidden"}, "", "")
-	if err == nil || err.Error() != "نه" {
+	if err == nil || err.Error() != "no" {
 		t.Fatalf("a listener could not stop the save: %v", err)
 	}
 }
@@ -91,11 +91,11 @@ func TestShortcodes(t *testing.T) {
 	pl.AddShortcode("year", func(map[string]string, string, ShortcodeContext) string { return "ignored: first wins" })
 	ctx := ShortcodeContext{Site: &Site{Name: "<b>Shop</b>"}, Now: time.Date(2026, 11, 21, 0, 0, 0, 0, time.UTC)}
 	cases := map[string]string{
-		"© [year] [site_name]":                        "© ۱۴۰۵ &lt;b&gt;Shop&lt;/b&gt;",
-		`[box tone="info"]Hi [year][/box]`:            `<div class="box info">Hi ۱۴۰۵</div>`,
+		"© [year] [site_name]":                        "© 1405 &lt;b&gt;Shop&lt;/b&gt;",
+		`[box tone="info"]Hi [year][/box]`:            `<div class="box info">Hi 1405</div>`,
 		`[box tone=&quot;x&quot;/]`:                   `<div class="box x"></div>`,
 		`[BOX tone='warn']x[/box]`:                    `<div class="box warn">x</div>`,
-		"[unknown a=1] [year/]":                       "[unknown a=1] ۱۴۰۵",
+		"[unknown a=1] [year/]":                       "[unknown a=1] 1405",
 		`[box tone="a&quot; onclick=&quot;x"]y[/box]`: `<div class="box a">y</div>`,
 		"no codes": "no codes",
 	}
@@ -106,7 +106,7 @@ func TestShortcodes(t *testing.T) {
 	}
 	// Never inside a tag: an attribute keeps its entities and its shortcodes.
 	attr := `<a title="[box tone=&quot;x&quot; onmouseover=&quot;alert(1)&quot;]" href="/y">[year]</a>`
-	if got := pl.renderShortcodes(attr, ctx); got != `<a title="[box tone=&quot;x&quot; onmouseover=&quot;alert(1)&quot;]" href="/y">۱۴۰۵</a>` {
+	if got := pl.renderShortcodes(attr, ctx); got != `<a title="[box tone=&quot;x&quot; onmouseover=&quot;alert(1)&quot;]" href="/y">1405</a>` {
 		t.Errorf("attribute changed: %q", got)
 	}
 	// Wrapping HTML still works: the tags go back in place.
@@ -114,7 +114,7 @@ func TestShortcodes(t *testing.T) {
 		t.Errorf("wrapped HTML = %q", got)
 	}
 	ctx.Calendar = "gregorian"
-	if got := pl.renderShortcodes("[year]", ctx); got != "۲۰۲۶" {
+	if got := pl.renderShortcodes("[year]", ctx); got != "2026" {
 		t.Errorf("gregorian year = %q", got)
 	}
 	// Bounded: a shortcode producing itself stops after the passes.

@@ -104,17 +104,17 @@ func parseMediaIDs(raw any) ([]uint, error) {
 	}
 	list, ok := raw.([]any)
 	if !ok {
-		return nil, mks.ValidationErrors{GalleryCollection: "فهرست رسانه‌ها معتبر نیست."}
+		return nil, mks.ValidationErrors{GalleryCollection: "Invalid media list."}
 	}
 	if len(list) > maxAttachments {
-		return nil, mks.ValidationErrors{GalleryCollection: fmt.Sprintf("حداکثر %d فایل.", maxAttachments)}
+		return nil, mks.ValidationErrors{GalleryCollection: fmt.Sprintf("At most %d files.", maxAttachments)}
 	}
 	ids := make([]uint, 0, len(list))
 	seen := map[uint]bool{}
 	for _, v := range list {
 		id, err := strconv.ParseUint(fmt.Sprint(v), 10, 64)
 		if err != nil || id == 0 {
-			return nil, mks.ValidationErrors{GalleryCollection: "فهرست رسانه‌ها معتبر نیست."}
+			return nil, mks.ValidationErrors{GalleryCollection: "Invalid media list."}
 		}
 		if !seen[uint(id)] {
 			seen[uint(id)] = true
@@ -145,7 +145,7 @@ func (pl *Plugin) takeGallery(ctx *mks.HookContext, owner string, siteID any, da
 			return err
 		}
 		if int(n) != len(ids) {
-			return mks.ValidationErrors{GalleryCollection: "فایلی بیرون از کتابخانهٔ رسانهٔ سایت انتخاب شده است."}
+			return mks.ValidationErrors{GalleryCollection: "A file outside the site's media library was selected."}
 		}
 	}
 	if ctx.HTTP != nil {

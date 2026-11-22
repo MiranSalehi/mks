@@ -82,7 +82,7 @@ type ImportRow map[string]string
 // ParseImport reads the rows of an import file.
 func ParseImport(format string, body []byte) ([]ImportRow, error) {
 	if len(body) > ImportMaxBytes {
-		return nil, fmt.Errorf("فایل بیش از %d مگابایت است", ImportMaxBytes>>20)
+		return nil, fmt.Errorf("The file is larger than %d MB", ImportMaxBytes>>20)
 	}
 	body = bytes.TrimPrefix(body, []byte("\xef\xbb\xbf")) // a UTF-8 BOM
 	var rows []ImportRow
@@ -97,7 +97,7 @@ func ParseImport(format string, body []byte) ([]ImportRow, error) {
 	case "wxr":
 		rows, err = parseWXR(body)
 	default:
-		return nil, errors.New("قالب فایل پشتیبانی نمی‌شود")
+		return nil, errors.New("Unsupported file format")
 	}
 	if err != nil {
 		return nil, err
@@ -117,7 +117,7 @@ func parseCSV(body []byte) ([]ImportRow, error) {
 		return nil, nil
 	}
 	if err != nil {
-		return nil, errors.New("CSV معتبر نیست")
+		return nil, errors.New("Invalid CSV")
 	}
 	for i := range header {
 		header[i] = strings.TrimSpace(header[i])
@@ -129,7 +129,7 @@ func parseCSV(body []byte) ([]ImportRow, error) {
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("CSV معتبر نیست (سطر %d)", len(rows)+2)
+			return nil, fmt.Errorf("Invalid CSV (line %d)", len(rows)+2)
 		}
 		row := ImportRow{}
 		for i, key := range header {
@@ -149,7 +149,7 @@ func parseJSON(body []byte) ([]ImportRow, error) {
 	dec := json.NewDecoder(bytes.NewReader(body))
 	dec.UseNumber()
 	if err := dec.Decode(&raw); err != nil {
-		return nil, errors.New("JSON معتبر نیست")
+		return nil, errors.New("Invalid JSON")
 	}
 	list, ok := raw.([]any)
 	if !ok {
@@ -191,7 +191,7 @@ type xmlNode struct {
 func parseXML(body []byte) ([]ImportRow, error) {
 	var root xmlNode
 	if err := xml.Unmarshal(body, &root); err != nil {
-		return nil, errors.New("XML معتبر نیست")
+		return nil, errors.New("Invalid XML")
 	}
 	var rows []ImportRow
 	for _, item := range root.Nodes {
@@ -213,7 +213,7 @@ func parseXML(body []byte) ([]ImportRow, error) {
 func parseWXR(body []byte) ([]ImportRow, error) {
 	var root xmlNode
 	if err := xml.Unmarshal(body, &root); err != nil {
-		return nil, errors.New("فایل خروجی وردپرس (WXR) معتبر نیست")
+		return nil, errors.New("Invalid WordPress export (WXR)")
 	}
 	var items []xmlNode
 	var walk func(n xmlNode)
@@ -326,10 +326,10 @@ func (pl *Plugin) Import(ctx *mks.HookContext, siteID uint, kind string, rows []
 					msgs = append(msgs, f+": "+m)
 				}
 				slices.Sort(msgs)
-				res.Errors = append(res.Errors, ImportRowError{Row: i + 1, Message: strings.Join(msgs, "؛ ")})
+				res.Errors = append(res.Errors, ImportRowError{Row: i + 1, Message: strings.Join(msgs, "; ")})
 			}
 		default:
-			return nil, fmt.Errorf("سطر %d: %w", i+1, err)
+			return nil, fmt.Errorf("Row %d: %w", i+1, err)
 		}
 	}
 	if !dryRun && res.Created+res.Updated > 0 {
@@ -341,7 +341,7 @@ func (pl *Plugin) Import(ctx *mks.HookContext, siteID uint, kind string, rows []
 // importRow saves one row; created says whether it was new.
 func (pl *Plugin) importRow(ctx *mks.HookContext, q orm.Query, siteID uint, kind string, row ImportRow, dryRun bool) (bool, error) {
 	if !slices.Contains([]string{ImportPost, ImportPage, ImportMedia}, kind) {
-		return false, errSkip{"نوع ردیف ناشناخته است: " + kind}
+		return false, errSkip{"Unknown row type: " + kind}
 	}
 	filtered := pl.filter(ImportRowFilter, row, kind, siteID)
 	if filtered == nil {
@@ -361,7 +361,7 @@ func (pl *Plugin) importRow(ctx *mks.HookContext, q orm.Query, siteID uint, kind
 		if empty {
 			return false, errSkip{} // a blank line
 		}
-		return false, errSkip{"عنوان یا نامک لازم است."}
+		return false, errSkip{"A title or slug is required."}
 	}
 	switch kind {
 	case ImportPost:
@@ -380,7 +380,7 @@ func importText(row ImportRow, key string, max int, errs mks.ValidationErrors) *
 		return nil
 	}
 	if utf8.RuneCountInString(v) > max {
-		errs[key] = fmt.Sprintf("بیش از %d نویسه است.", max)
+		errs[key] = fmt.Sprintf("More than %d characters.", max)
 		return nil
 	}
 	return &v
@@ -440,14 +440,14 @@ func (pl *Plugin) importPost(ctx *mks.HookContext, q orm.Query, siteID uint, row
 		title = slug
 	}
 	if utf8.RuneCountInString(title) > 255 {
-		errs["title"] = "بیش از ۲۵۵ نویسه است."
+		errs["title"] = "More than 255 characters."
 	}
 	content := mks.SanitizeHTML(row["content"])
 	excerpt := importText(row, "excerpt", 500, errs)
 	status := importStatus(ImportPost, row["status"])
 	published, ok := importTime(row["published_at"])
 	if !ok {
-		errs["published_at"] = "تاریخ معتبر نیست."
+		errs["published_at"] = "Invalid date."
 	}
 	if published == nil && status == "published" {
 		now := pl.now().Truncate(time.Second)
@@ -507,13 +507,13 @@ func (pl *Plugin) importPage(ctx *mks.HookContext, q orm.Query, siteID uint, row
 		title = slug
 	}
 	if utf8.RuneCountInString(title) > 255 {
-		errs["title"] = "بیش از ۲۵۵ نویسه است."
+		errs["title"] = "More than 255 characters."
 	}
 	content := mks.SanitizeHTML(row["content"])
 	status := importStatus(ImportPage, row["status"])
 	published, ok := importTime(row["published_at"])
 	if !ok {
-		errs["published_at"] = "تاریخ معتبر نیست."
+		errs["published_at"] = "Invalid date."
 	}
 	if status == "scheduled" && published == nil {
 		status = "draft"
@@ -575,7 +575,7 @@ func (pl *Plugin) importPage(ctx *mks.HookContext, q orm.Query, siteID uint, row
 func (pl *Plugin) importMedia(q orm.Query, siteID uint, row ImportRow, dryRun bool) (bool, error) {
 	path := strings.TrimSpace(row["path"])
 	if path == "" {
-		return false, errSkip{"فایل‌های بیرونی بارگذاری نمی‌شوند؛ فقط فایل‌های کتابخانه (با path) به‌روز می‌شوند."}
+		return false, errSkip{"External files are not uploaded; only library files (with a path) are updated."}
 	}
 	errs := mks.ValidationErrors{}
 	alt := importText(row, "alt", 255, errs)
@@ -589,7 +589,7 @@ func (pl *Plugin) importMedia(q orm.Query, siteID uint, row ImportRow, dryRun bo
 		return false, err
 	}
 	if len(existing) == 0 {
-		return false, errSkip{"این فایل در کتابخانهٔ رسانهٔ سایت نیست: " + path}
+		return false, errSkip{"This file is not in the site's media library: " + path}
 	}
 	if dryRun {
 		return false, nil
@@ -646,7 +646,7 @@ func (pl *Plugin) Export(siteID uint, kind, format string) ([]byte, error) {
 				"alt": m.Alt, "title": m.Title, "caption": m.Caption})
 		}
 	default:
-		return nil, errors.New("نوع نامعتبر است")
+		return nil, errors.New("Invalid type")
 	}
 	text := make([]map[string]string, len(rows))
 	for i, r := range rows {
@@ -689,7 +689,7 @@ func (pl *Plugin) Export(siteID uint, kind, format string) ([]byte, error) {
 		w.Flush()
 		return b.Bytes(), w.Error()
 	}
-	return nil, errors.New("قالب نامعتبر است")
+	return nil, errors.New("Invalid theme")
 }
 
 func exportText(v any) string {
@@ -742,7 +742,7 @@ func (pl *Plugin) transferPage() mks.Page {
 				return nil, err
 			}
 			if site == nil {
-				return nil, mks.Reject("سایت فعال پیدا نشد.")
+				return nil, mks.Reject("Active site not found.")
 			}
 			kind, _ := ctx.Data["kind"].(string)
 			format, _ := ctx.Data["format"].(string)
@@ -750,13 +750,13 @@ func (pl *Plugin) transferPage() mks.Page {
 			dryRun, _ := ctx.Data["dry_run"].(bool)
 			errs := mks.ValidationErrors{}
 			if _, ok := ImportFields[kind]; !ok && format != "wxr" {
-				errs["kind"] = "نوع محتوا را انتخاب کنید."
+				errs["kind"] = "Choose a content type."
 			}
 			if !slices.Contains(ImportFormats, format) {
-				errs["format"] = "قالب فایل را انتخاب کنید."
+				errs["format"] = "Choose a template file."
 			}
 			if content == "" {
-				errs["content"] = "فایلی انتخاب نشده یا خالی است."
+				errs["content"] = "No file selected, or it is empty."
 			}
 			mapping := map[string]string{}
 			if raw, ok := ctx.Data["mapping"].(map[string]any); ok {
@@ -767,7 +767,7 @@ func (pl *Plugin) transferPage() mks.Page {
 						continue
 					}
 					if !slices.Contains(ImportFields[kind], target) && format != "wxr" {
-						errs["mapping"] = "فیلد مقصد «" + target + "» برای این نوع وجود ندارد."
+						errs["mapping"] = "The target field \"" + target + "\" does not exist for this type."
 					}
 					mapping[from] = target
 				}
@@ -781,15 +781,15 @@ func (pl *Plugin) transferPage() mks.Page {
 			}
 			sid, ok := toUint(site.ID)
 			if !ok {
-				return nil, mks.Reject("سایت فعال پیدا نشد.")
+				return nil, mks.Reject("Active site not found.")
 			}
 			res, err := pl.Import(ctx.HookContext, sid, kind, rows, mapping, dryRun)
 			if err != nil {
 				return nil, err
 			}
-			title := fmt.Sprintf("درون‌ریزی انجام شد: %d تازه، %d به‌روز، %d ردشده.", res.Created, res.Updated, res.Skipped)
+			title := fmt.Sprintf("Import finished: %d new, %d updated, %d skipped.", res.Created, res.Updated, res.Skipped)
 			if dryRun {
-				title = fmt.Sprintf("آزمایش (چیزی ذخیره نشد): %d تازه، %d به‌روز، %d ردشده.", res.Created, res.Updated, res.Skipped)
+				title = fmt.Sprintf("Dry run (nothing saved): %d new, %d updated, %d skipped.", res.Created, res.Updated, res.Skipped)
 			}
 			out := mks.Success(title)
 			if res.Skipped > 0 {

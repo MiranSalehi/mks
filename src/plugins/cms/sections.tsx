@@ -2,7 +2,7 @@ import { SquaresIcon, defineResource, tr } from '../../index'
 import { pageBuilder } from './pageBuilder'
 import type { Section } from './types'
 
-/** Reusable groups of blocks; a "بخش آماده" block shows one in any page. */
+/** Reusable groups of blocks; a "Saved section" block shows one in any page. */
 export const sections = defineResource<Section>({
   name: 'cms_sections',
   label: tr({ fa: 'سکشن ذخیره‌شده', en: 'Saved section' }),

@@ -80,7 +80,7 @@ export class Stat {
     return this
   }
 
-  /** A short line under the value, e.g. "نسبت به ماه قبل". */
+  /** A short line under the value, e.g. "vs last month". */
   description(text: string): this {
     this._description = text
     return this
@@ -133,7 +133,7 @@ export class ChartWidget extends Widget {
     return this
   }
 
-  /** Words for label values, e.g. { draft: 'پیش‌نویس' }. */
+  /** Words for label values, e.g. { draft: 'Draft' }. */
   labels(map: Record<string, string>): this {
     this._labels = map
     return this

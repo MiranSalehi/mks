@@ -6,7 +6,7 @@ import type { Menu, MenuItem } from './types'
 // The menu builder (MKSine's MenuBuilder page): sources on one side (custom link,
 // categories, tags, pages, posts), the menu as a flat list on the other. Rows are dragged
 // to reorder; dragging sideways, or the ←/→ buttons, nests them. Nothing is saved until
-// "ذخیره منو".
+// "Save menu".
 
 const L = (fa: string, en: string) => tr({ fa, en })
 
@@ -690,7 +690,7 @@ function MenuBuilderPage() {
   )
 }
 
-/** MKSine's "ساخت منو": not in the sidebar; opened from the menus list or a menu's page. */
+/** MKSine's "Menu builder": not in the sidebar; opened from the menus list or a menu's page. */
 export const menuBuilderPage = definePage({
   name: 'menu_builder',
   label: L('ساخت منو', 'Menu builder'),

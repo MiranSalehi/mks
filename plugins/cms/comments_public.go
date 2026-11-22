@@ -31,14 +31,14 @@ type commentsView struct {
 }
 
 var commentNotices = map[string]string{
-	"sent":     "دیدگاه شما ثبت شد و پس از تأیید نمایش داده می‌شود.",
-	"name":     "نام لازم است (حداکثر ۱۰۰ نویسه).",
-	"email":    "یک ایمیل معتبر وارد کنید.",
-	"content":  "متن دیدگاه باید بین ۳ تا ۵۰۰۰ نویسه باشد.",
-	"rating":   "امتیاز باید بین ۱ تا ۵ باشد.",
-	"parent":   "دیدگاهی که به آن پاسخ می‌دهید پیدا نشد.",
-	"closed":   "برای این مورد نمی‌توان دیدگاه گذاشت.",
-	"too-many": "دیدگاه‌های زیادی از نشانی شما رسیده است؛ کمی بعد دوباره تلاش کنید.",
+	"sent":     "Your comment was submitted and will appear after approval.",
+	"name":     "The name is required (at most 100 characters).",
+	"email":    "Enter a valid email.",
+	"content":  "The comment must be between 3 and 5000 characters.",
+	"rating":   "The rating must be between 1 and 5.",
+	"parent":   "The comment you are replying to was not found.",
+	"closed":   "Comments are not allowed on this item.",
+	"too-many": "Too many comments from your address; try again later.",
 }
 
 // commentsFor builds the comments section of a post or page.
@@ -52,10 +52,10 @@ func (pl *Plugin) commentsFor(req *request, kind string, id uint, base string) (
 	for _, c := range items {
 		total += 1 + len(c.Replies)
 	}
-	v := &commentsView{Count: persianDigits.Replace(strconv.Itoa(total)), Items: items, Open: true,
+	v := &commentsView{Count: strconv.Itoa(total), Items: items, Open: true,
 		Action: pl.SiteURL(req.site.Slug) + "/comments", Target: kind + ":" + strconv.FormatUint(uint64(id), 10), FormLink: base}
 	if rated > 0 {
-		v.Average = persianDigits.Replace(strconv.FormatFloat(avg, 'f', 1, 64)) + " از ۵ (" + persianDigits.Replace(strconv.Itoa(rated)) + " امتیاز)"
+		v.Average = strconv.FormatFloat(avg, 'f', 1, 64) + " out of 5 (" + strconv.Itoa(rated) + " ratings)"
 	}
 	if replyTo, err := strconv.ParseUint(req.ctx.Request().Query("reply"), 10, 64); err == nil {
 		for i := range items {

@@ -15,7 +15,7 @@ func TestSaveValidates(t *testing.T) {
 		"bad key":    {"1bad": "x"},
 		"script key": {"a<b": "x"},
 		"not text":   {"nav.home": 3},
-		"too long":   {"nav.home": strings.Repeat("ب", 1001)},
+		"too long":   {"nav.home": strings.Repeat("b", 1001)},
 	}
 	for name, values := range cases {
 		err := pl.save(nil, "fa", values)

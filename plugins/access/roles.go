@@ -45,11 +45,11 @@ func (pl *Plugin) rolesResource() mks.ModelResource[Role] {
 				return nil
 			}
 			if role.Super {
-				return mks.Reject("فقط کاربر با نقش کامل می‌تواند نقش کامل را حذف کند.")
+				return mks.Reject("Only a user with the full role can delete the full role.")
 			}
 			for _, perm := range role.Permissions.V {
 				if !pl.Allowed(ctx, perm) {
-					return mks.Reject("این نقش مجوزهایی دارد که شما ندارید.")
+					return mks.Reject("This role has permissions you do not have.")
 				}
 			}
 			return nil
@@ -83,29 +83,29 @@ func (pl *Plugin) checkRole(ctx *mks.HookContext, data map[string]any, stored *R
 			return err
 		}
 		if n > 0 {
-			return mks.ValidationErrors{"name": "نقشی با این نام وجود دارد."}
+			return mks.ValidationErrors{"name": "A role with this name exists."}
 		}
 	}
 	super := pl.isSuper(ctx)
 	if stored != nil && stored.Super && !super {
-		return mks.Reject("فقط کاربر با نقش کامل می‌تواند نقش کامل را تغییر دهد.")
+		return mks.Reject("Only a user with the full role can change the full role.")
 	}
 	// A role with permissions you lack is out of reach: changing it (even only its users,
 	// e.g. adding yourself) would hand out what you do not hold.
 	if stored != nil && !super {
 		for _, perm := range stored.Permissions.V {
 			if !pl.Allowed(ctx, perm) {
-				return mks.Reject("این نقش مجوزهایی دارد که شما ندارید؛ فقط کاربری با این مجوزها می‌تواند آن را تغییر دهد.")
+				return mks.Reject("This role has permissions you do not have; only a user with them can change it.")
 			}
 		}
 	}
 	if v, sent := data["super"]; sent {
 		b, ok := v.(bool)
 		if !ok {
-			return mks.ValidationErrors{"super": "مقدار نامعتبر است."}
+			return mks.ValidationErrors{"super": "Invalid value."}
 		}
 		if b && !super {
-			return mks.ValidationErrors{"super": "فقط کاربر با نقش کامل می‌تواند نقش کامل بسازد."}
+			return mks.ValidationErrors{"super": "Only a user with the full role can create the full role."}
 		}
 	}
 	if raw, sent := data["permissions"]; sent {
@@ -126,7 +126,7 @@ func (pl *Plugin) checkRole(ctx *mks.HookContext, data map[string]any, stored *R
 		if !super {
 			for _, perm := range perms {
 				if !pl.Allowed(ctx, perm) {
-					return mks.ValidationErrors{"permissions": "نمی‌توانید مجوزی را بدهید که خودتان ندارید: " + perm}
+					return mks.ValidationErrors{"permissions": "You cannot grant a permission you do not have: " + perm}
 				}
 			}
 		}

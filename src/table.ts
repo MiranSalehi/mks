@@ -273,7 +273,7 @@ export class DateColumn<T = ResourceRecord> extends Column<T> {
     return this
   }
 
-  /** Shows relative time ("۳ روز پیش"), with the full date as a tooltip. */
+  /** Shows relative time ("3 days ago"), with the full date as a tooltip. */
   since(since = true): this {
     this._since = since
     return this

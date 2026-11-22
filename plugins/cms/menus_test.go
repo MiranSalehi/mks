@@ -68,19 +68,19 @@ func TestNormalizeMenuItemsReportsErrorsAtFormPaths(t *testing.T) {
 		{"type": "group", "label": "Bad children", "children": {"a": 1}}
 	]`))
 	want := mks.ValidationErrors{
-		"items.0.page_id":             "یک برگه انتخاب کنید.",
-		"items.1.url":                 "نشانی باید با https:// ،http:// ،mailto: ،tel: یا / شروع شود.",
-		"items.2.label":               "عنوان لازم است.",
-		"items.2.url":                 "نشانی لینک لازم است.",
-		"items.3.children":            "گروه باید دست‌کم یک زیرمنو داشته باشد.",
-		"items.4.children.0.children": "گروه باید دست‌کم یک زیرمنو داشته باشد.",
-		"items.4.children.1.page_id":  "یک برگه انتخاب کنید.",
-		"items.4.children.2.page_id":  "یک برگه انتخاب کنید.",
-		"items.4.children.3":          "ساختار آیتم منو معتبر نیست.",
-		"items.5.type":                "نوع آیتم منو معتبر نیست.",
-		"items.5.label":               "عنوان باید متن باشد.",
-		"items.6.label":               "عنوان حداکثر ۱۰۰ نویسه است.",
-		"items.7.children":            "ساختار زیرمنو معتبر نیست.",
+		"items.0.page_id":             "Select a page.",
+		"items.1.url":                 "The URL must start with https://, http://, mailto:, tel: or /.",
+		"items.2.label":               "The title is required.",
+		"items.2.url":                 "The link URL is required.",
+		"items.3.children":            "A group must have at least one submenu.",
+		"items.4.children.0.children": "A group must have at least one submenu.",
+		"items.4.children.1.page_id":  "Select a page.",
+		"items.4.children.2.page_id":  "Select a page.",
+		"items.4.children.3":          "Invalid menu item structure.",
+		"items.5.type":                "Invalid menu item type.",
+		"items.5.label":               "The title must be text.",
+		"items.6.label":               "The title is at most 100 characters.",
+		"items.7.children":            "Invalid submenu structure.",
 	}
 	if !reflect.DeepEqual(errs, want) {
 		t.Fatalf("errors =\n%#v\nwant\n%#v", errs, want)

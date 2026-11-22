@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { useLocaleForTests } from '../src/i18n'
 import { applyMarkdown } from '../src/markdown'
 
 describe('applyMarkdown', () => {
@@ -9,8 +10,10 @@ describe('applyMarkdown', () => {
   })
 
   it('inserts placeholder text without a selection', () => {
+    useLocaleForTests('en')
     const e = applyMarkdown('ab', 1, 1, 'code')
-    expect(e.text).toBe('a`متن`b')
+    expect(e.text).toBe('a`text`b')
+    useLocaleForTests('fa')
   })
 
   it('prefixes every selected line', () => {

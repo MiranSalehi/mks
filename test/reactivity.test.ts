@@ -8,8 +8,8 @@ describe('slugify', () => {
   it('makes URL slugs', () => {
     expect(slugify('Hello  World!')).toBe('hello-world')
     expect(slugify('  Go & React 2026 ')).toBe('go-react-2026')
-    expect(slugify('معرفی Go (۱۲)')).toBe('go-12')
-    expect(slugify('فقط فارسی')).toBe('')
+    expect(slugify('日本語 Go (12)')).toBe('go-12')
+    expect(slugify('日本語')).toBe('')
   })
 })
 

@@ -9,12 +9,12 @@ export interface JalaliDate {
 }
 
 export const JALALI_MONTHS = [
-  'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
-  'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند',
+  'Farvardin', 'Ordibehesht', 'Khordad', 'Tir', 'Mordad', 'Shahrivar',
+  'Mehr', 'Aban', 'Azar', 'Dey', 'Bahman', 'Esfand',
 ]
 
 /** Saturday first, as in Iran. */
-export const WEEKDAYS_SHORT = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج']
+export const WEEKDAYS_SHORT = ['Sa', 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr']
 
 const DAY = 24 * 3600 * 1000
 const formatters = new Map<string, Intl.DateTimeFormat>()

@@ -31,19 +31,19 @@ func (pl *Plugin) uploadPackage(ctx http.Context) http.Response {
 	}
 	file, err := ctx.Request().File("file")
 	if err != nil {
-		return ctx.Response().Json(422, http.Json{"message": "فایل ZIP را انتخاب کنید."})
+		return ctx.Response().Json(422, http.Json{"message": "Select a ZIP file."})
 	}
 	if size, err := file.Size(); err != nil || size > MaxPackageSize {
-		return ctx.Response().Json(422, http.Json{"message": fmt.Sprintf("فایل بزرگ‌تر از %d مگابایت است.", MaxPackageSize>>20)})
+		return ctx.Response().Json(422, http.Json{"message": fmt.Sprintf("The file is larger than %d MB.", MaxPackageSize>>20)})
 	}
 	f, err := os.Open(file.File())
 	if err != nil {
-		return ctx.Response().Json(500, http.Json{"message": "فایل خوانده نشد."})
+		return ctx.Response().Json(500, http.Json{"message": "The file could not be read."})
 	}
 	data, err := io.ReadAll(io.LimitReader(f, MaxPackageSize+1))
 	f.Close()
 	if err != nil {
-		return ctx.Response().Json(500, http.Json{"message": "فایل خوانده نشد."})
+		return ctx.Response().Json(500, http.Json{"message": "The file could not be read."})
 	}
 	update, force := ctx.Request().InputBool("update"), ctx.Request().InputBool("force")
 	row, err := pl.installPackage(kind, data, update, force)
@@ -52,12 +52,12 @@ func (pl *Plugin) uploadPackage(ctx http.Context) http.Response {
 			return ctx.Response().Json(422, http.Json{"message": msg})
 		}
 		pl.logf("cms: install %s: %v", kind, err)
-		return ctx.Response().Json(500, http.Json{"message": "نصب انجام نشد."})
+		return ctx.Response().Json(500, http.Json{"message": "Installation failed."})
 	}
-	what := map[string]string{KindTheme: "قالب", KindPlugin: "افزونه"}[kind]
-	msg := fmt.Sprintf("%s «%s» نسخهٔ %s نصب شد.", what, row.PackageID, row.Version)
+	what := map[string]string{KindTheme: "Theme", KindPlugin: "Plugin"}[kind]
+	msg := fmt.Sprintf("%s \"%s\" version %s installed.", what, row.PackageID, row.Version)
 	if update {
-		msg = fmt.Sprintf("%s «%s» به نسخهٔ %s به‌روزرسانی شد.", what, row.PackageID, row.Version)
+		msg = fmt.Sprintf("%s \"%s\" updated to version %s.", what, row.PackageID, row.Version)
 	}
 	if kind == KindPlugin && row.Status == StatusActive {
 		pl.bumpAll()
@@ -71,7 +71,7 @@ func (pl *Plugin) uploadPackage(ctx http.Context) http.Response {
 // handleThemeInstall: the theme actions that change installed files.
 func (pl *Plugin) handleThemeInstall(ctx *mks.PageContext, action string) (*mks.ActionResult, error) {
 	if !pl.canInstallThemes(ctx.HookContext) {
-		return nil, mks.Reject("اجازهٔ این کار را ندارید.")
+		return nil, mks.Reject("You are not allowed to do this.")
 	}
 	id, _ := ctx.Data["id"].(string)
 	switch action {
@@ -89,14 +89,14 @@ func (pl *Plugin) handleThemeInstall(ctx *mks.PageContext, action string) (*mks.
 		if name, used, err := pl.themeInUse(id); err != nil {
 			return nil, err
 		} else if used {
-			return nil, mks.Reject(fmt.Sprintf("این قالب در سایت «%s» فعال است؛ اول قالب دیگری را فعال کنید.", name))
+			return nil, mks.Reject(fmt.Sprintf("This theme is active on the site \"%s\"; activate another theme first.", name))
 		}
 		if err := pl.deletePackage(row); err != nil {
 			return nil, err
 		}
-		return mks.Success("قالب حذف شد."), nil
+		return mks.Success("Theme deleted."), nil
 	}
-	return nil, mks.Reject("این کار شناخته نشد.")
+	return nil, mks.Reject("Unknown action.")
 }
 
 // pluginsPage is the "plugins" page: the installed plugin ZIPs and what to do with them.
@@ -129,7 +129,7 @@ func (pl *Plugin) pluginsPage() mks.Page {
 				// Re-read the installed packages now (a ZIP may have been placed by hand).
 				pl.packagesChanged()
 				pl.bumpAll()
-				return mks.Success("افزونه‌ها شناسایی شدند."), nil
+				return mks.Success("Plugins detected."), nil
 			}
 			id, _ := ctx.Data["id"].(string)
 			row, err := pl.packageRow(KindPlugin, id)
@@ -151,10 +151,10 @@ func (pl *Plugin) pluginsPage() mks.Page {
 				if _, err := pl.query().Model(&Package{}).Where("id = ?", row.ID).Update("log", mks.NewJSON([]PackageLogEntry{})); err != nil {
 					return nil, err
 				}
-				return mks.Success("گزارش پاک شد."), nil
+				return mks.Success("Log cleared."), nil
 			case "delete":
 				if row.Status == StatusActive {
-					return nil, mks.Reject("اول افزونه را غیرفعال کنید.")
+					return nil, mks.Reject("Deactivate the plugin first.")
 				}
 				if data, _ := ctx.Data["delete_data"].(bool); data {
 					if _, err := pl.query().Exec("DELETE FROM "+SettingsTable+" WHERE name LIKE ?", "plugin:"+row.PackageID+":%"); err != nil {
@@ -171,9 +171,9 @@ func (pl *Plugin) pluginsPage() mks.Page {
 				if err := pl.deletePackage(row); err != nil {
 					return nil, err
 				}
-				return mks.Success("افزونه حذف شد."), nil
+				return mks.Success("Plugin deleted."), nil
 			}
-			return nil, mks.Reject("این کار شناخته نشد.")
+			return nil, mks.Reject("Unknown action.")
 		},
 	}
 }
@@ -185,35 +185,35 @@ func asList(v any) []any {
 
 func (pl *Plugin) activatePlugin(row *Package) (*mks.ActionResult, error) {
 	if row.Status == StatusActive {
-		return mks.Success("افزونه فعال است."), nil
+		return mks.Success("The plugin is active."), nil
 	}
 	m := row.Manifest.V
 	for _, req := range asList(m["requires"]) {
 		dep, _ := req.(string)
 		if !pl.pluginActive(dep) {
-			return nil, mks.Reject(fmt.Sprintf("این افزونه به افزونهٔ «%s» نیاز دارد؛ اول آن را نصب و فعال کنید.", dep))
+			return nil, mks.Reject(fmt.Sprintf("This plugin requires the plugin \"%s\"; install and activate it first.", dep))
 		}
 	}
 	// It must start before it is turned on.
 	if _, err := pl.loadPlugin(*row); err != nil {
-		pl.logPackage(row, "error", "فعال نشد: "+err.Error())
-		return nil, mks.Reject("افزونه راه‌اندازی نشد: " + err.Error())
+		pl.logPackage(row, "error", "Failed to activate: "+err.Error())
+		return nil, mks.Reject("Plugin failed to start: " + err.Error())
 	}
 	now := time.Now()
 	if _, err := pl.query().Model(&Package{}).Where("id = ?", row.ID).Update(map[string]any{
 		"status": StatusActive, "activated_at": now, "boot_error": nil, "boot_failed_at": nil,
-		"log": mks.NewJSON(appendLog(row.Log.V, "info", "فعال شد.")),
+		"log": mks.NewJSON(appendLog(row.Log.V, "info", "Activated.")),
 	}); err != nil {
 		return nil, err
 	}
 	pl.packagesChanged()
 	pl.bumpAll()
-	return mks.Success("افزونه فعال شد."), nil
+	return mks.Success("Plugin activated."), nil
 }
 
 func (pl *Plugin) deactivatePlugin(row *Package) (*mks.ActionResult, error) {
 	if row.Status != StatusActive {
-		return mks.Success("افزونه غیرفعال است."), nil
+		return mks.Success("The plugin is inactive."), nil
 	}
 	// Not while an active plugin or a theme in use needs it (MKSine blocks it too).
 	var rows []Package
@@ -229,24 +229,24 @@ func (pl *Plugin) deactivatePlugin(row *Package) (*mks.ActionResult, error) {
 				continue
 			}
 			if other.Kind == KindPlugin {
-				return nil, mks.Reject(fmt.Sprintf("افزونهٔ فعال «%s» به این افزونه نیاز دارد.", other.PackageID))
+				return nil, mks.Reject(fmt.Sprintf("The active plugin \"%s\" requires this plugin.", other.PackageID))
 			}
 			if name, used, err := pl.themeInUse(other.PackageID); err != nil {
 				return nil, err
 			} else if used {
-				return nil, mks.Reject(fmt.Sprintf("قالب «%s» در سایت «%s» به این افزونه نیاز دارد.", other.PackageID, name))
+				return nil, mks.Reject(fmt.Sprintf("The theme \"%s\" on the site \"%s\" needs this plugin.", other.PackageID, name))
 			}
 		}
 	}
 	now := time.Now()
 	if _, err := pl.query().Model(&Package{}).Where("id = ?", row.ID).Update(map[string]any{
-		"status": StatusInactive, "deactivated_at": now, "log": mks.NewJSON(appendLog(row.Log.V, "info", "غیرفعال شد.")),
+		"status": StatusInactive, "deactivated_at": now, "log": mks.NewJSON(appendLog(row.Log.V, "info", "Deactivated.")),
 	}); err != nil {
 		return nil, err
 	}
 	pl.packagesChanged()
 	pl.bumpAll()
-	return mks.Success("افزونه غیرفعال شد."), nil
+	return mks.Success("Plugin deactivated."), nil
 }
 
 func (pl *Plugin) pluginActive(id string) bool {

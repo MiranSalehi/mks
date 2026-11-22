@@ -198,7 +198,7 @@ export function messages(l: Locale): Messages {
 
 /**
  * Picks the app's own text for the current locale, e.g. a resource label:
- *	label: tr({ fa: 'نوشته', en: 'Post' })
+ *	label: tr({ en: 'Post' }) // missing locales fall back to `en`
  * Falls back to Persian, then English.
  */
 export function tr(texts: Partial<Record<Locale, string>>): string {

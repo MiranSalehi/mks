@@ -55,20 +55,20 @@ func (pl *Plugin) themesPage() mks.Page {
 				// Re-read the installed packages now and drop the site's page cache.
 				pl.packagesChanged()
 				pl.bumpAll()
-				return mks.Success("قالب‌ها شناسایی شدند."), nil
+				return mks.Success("Themes detected."), nil
 			case "activate":
 				id, _ := ctx.Data["id"].(string)
 				if !pl.hasTheme(id) {
-					return nil, mks.Reject("این قالب پیدا نشد.")
+					return nil, mks.Reject("This theme was not found.")
 				}
 				if missing := pl.missingRequirements(pl.themeByID(id)); len(missing) > 0 {
-					return nil, mks.Reject("این قالب به افزونه‌های فعال نیاز دارد: " + strings.Join(missing, "، "))
+					return nil, mks.Reject("This theme requires active plugins: " + strings.Join(missing, ", "))
 				}
 				ctx.Data = map[string]any{"theme": id}
 				if _, err := pl.saveSettings(ctx); err != nil {
 					return nil, err
 				}
-				return mks.Success("قالب فعال شد."), nil
+				return mks.Success("Theme activated."), nil
 			case "save_code":
 				data := map[string]any{"custom_css": ctx.Data["custom_css"]}
 				if v, sent := ctx.Data["custom_js"]; sent && pl.canCode(ctx.HookContext) {
@@ -78,7 +78,7 @@ func (pl *Plugin) themesPage() mks.Page {
 				if _, err := pl.saveSettings(ctx); err != nil {
 					return nil, err
 				}
-				return mks.Success("CSS و JavaScript سفارشی ذخیره شد."), nil
+				return mks.Success("Custom CSS and JavaScript saved."), nil
 			}
 			return pl.handleThemeInstall(ctx, action)
 		},

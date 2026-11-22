@@ -7,8 +7,8 @@ import (
 )
 
 func TestParseImportFormats(t *testing.T) {
-	csvRows, err := ParseImport("csv", []byte("\xef\xbb\xbftitle,slug,status\nسلام,hello,publish\n\"با, ویرگول\",two,draft\n"))
-	if err != nil || len(csvRows) != 2 || csvRows[0]["title"] != "سلام" || csvRows[1]["title"] != "با, ویرگول" {
+	csvRows, err := ParseImport("csv", []byte("\xef\xbb\xbftitle,slug,status\n日本語,hello,publish\n\"With, comma\",two,draft\n"))
+	if err != nil || len(csvRows) != 2 || csvRows[0]["title"] != "日本語" || csvRows[1]["title"] != "With, comma" {
 		t.Fatalf("csv = %v, %v", csvRows, err)
 	}
 	jsonRows, err := ParseImport("json", []byte(`[{"title":"a","size":12,"ok":true,"nested":{"x":1}}, 5]`))
@@ -88,7 +88,7 @@ func TestImportHelpers(t *testing.T) {
 	if importSlug(ImportRow{"slug": "My Post"}) != "my-post" || importSlug(ImportRow{"title": "Go 1.25"}) != "go-1-25" {
 		t.Error("slugs come from the slug, then the title")
 	}
-	if s := importSlug(ImportRow{"title": "سلام"}); !strings.HasPrefix(s, "item-") || len(s) != 13 {
+	if s := importSlug(ImportRow{"title": "日本語"}); !strings.HasPrefix(s, "item-") || len(s) != 13 {
 		t.Errorf("a title without Latin letters gets a random slug: %q", s)
 	}
 	for _, in := range []string{"2024-05-01 10:00:00", "2024-05-01", "2024-05-01T10:00:00Z"} {

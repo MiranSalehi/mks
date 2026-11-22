@@ -185,12 +185,12 @@ const themeLayout = `<!doctype html>
 <title>{{.Title}}</title>{{if .Description}}<meta name="description" content="{{.Description}}">{{end}}
 <link rel="canonical" href="{{.Canonical}}">{{if .Favicon}}<link rel="icon" href="{{.Favicon}}">{{end}}
 {{with .Social}}<meta property="og:type" content="{{.Type}}"><meta property="og:title" content="{{$.Title}}">{{if .Description}}<meta property="og:description" content="{{.Description}}">{{end}}{{if .URL}}<meta property="og:url" content="{{.URL}}">{{end}}<meta property="og:site_name" content="{{.SiteName}}"><meta property="og:locale" content="fa_IR">{{if .Image}}<meta property="og:image" content="{{.Image}}"><meta name="twitter:card" content="summary_large_image">{{else}}<meta name="twitter:card" content="summary">{{end}}{{if .Published}}<meta property="article:published_time" content="{{.Published}}">{{end}}{{if .JSONLD}}<script type="application/ld+json">{{.JSONLD}}</script>{{end}}{{end}}
-<style>{{.CSS}}</style>{{if .CustomCSS}}<style>{{.CustomCSS}}</style>{{end}}</head><body>{{with .AdminBar}}<nav class="admin-bar" aria-label="نوار مدیریت">{{range .Items}}<a href="{{.URL}}">{{.Label}}</a>{{end}}{{if .User}}<span class="who">{{.User}}</span>{{end}}</nav>{{end}}{{index .Hooks "layout.body_start"}}<div class="topline"></div>
-{{if not .Bare}}<header class="site-head"><div class="wrap"><a class="brand" href="{{.HomeURL}}">{{if .Logo}}<img src="{{.Logo}}" alt="{{.SiteName}}" class="logo">{{else}}{{.SiteName}}{{end}}</a>{{if .HeaderNav}}<nav aria-label="منوی اصلی"><ul class="nav">{{range .HeaderNav}}<li>{{template "navitem" .}}</li>{{end}}</ul></nav>{{end}}</div></header>{{end}}
+<style>{{.CSS}}</style>{{if .CustomCSS}}<style>{{.CustomCSS}}</style>{{end}}</head><body>{{with .AdminBar}}<nav class="admin-bar" aria-label="Admin bar">{{range .Items}}<a href="{{.URL}}">{{.Label}}</a>{{end}}{{if .User}}<span class="who">{{.User}}</span>{{end}}</nav>{{end}}{{index .Hooks "layout.body_start"}}<div class="topline"></div>
+{{if not .Bare}}<header class="site-head"><div class="wrap"><a class="brand" href="{{.HomeURL}}">{{if .Logo}}<img src="{{.Logo}}" alt="{{.SiteName}}" class="logo">{{else}}{{.SiteName}}{{end}}</a>{{if .HeaderNav}}<nav aria-label="Main menu"><ul class="nav">{{range .HeaderNav}}<li>{{template "navitem" .}}</li>{{end}}</ul></nav>{{end}}</div></header>{{end}}
 <main style="--content-width:{{.Width}}">
 {{index .Hooks (printf "%s.before_content" .View)}}{{with .Page}}{{template "page" .}}{{end}}{{with .Post}}{{template "post" .}}{{end}}{{with .List}}{{template "list" .}}{{end}}{{with .Terms}}{{template "terms" .}}{{end}}{{index .Hooks (printf "%s.after_content" .View)}}
 </main>
-{{if not .Bare}}<footer class="site-foot"><div class="wrap">{{if .FooterNav}}<nav aria-label="منوی پایین"><ul class="foot-nav">{{range .FooterNav}}<li>{{template "footitem" .}}</li>{{end}}</ul></nav>{{end}}<div class="copy">{{.SiteName}}{{if .Tagline}} — {{.Tagline}}{{end}}</div></div></footer>{{end}}
+{{if not .Bare}}<footer class="site-foot"><div class="wrap">{{if .FooterNav}}<nav aria-label="Footer menu"><ul class="foot-nav">{{range .FooterNav}}<li>{{template "footitem" .}}</li>{{end}}</ul></nav>{{end}}<div class="copy">{{.SiteName}}{{if .Tagline}} — {{.Tagline}}{{end}}</div></div></footer>{{end}}
 {{if .Script}}<script>` + blockScript + `</script>{{end}}{{range .Scripts}}<script src="{{.}}" defer></script>{{end}}{{if .CustomJS}}<script>{{.CustomJS}}</script>{{end}}</body></html>
 {{define "navitem"}}{{if .Children}}<details{{if .Current}} class="current"{{end}}><summary>{{.Label}}</summary><ul>{{range .Children}}<li>{{template "navitem" .}}</li>{{end}}</ul></details>{{else}}{{template "link" .}}{{end}}{{end}}
 {{define "footitem"}}{{if .Children}}<span class="group">{{.Label}}</span><ul>{{range .Children}}<li>{{template "footitem" .}}</li>{{end}}</ul>{{else}}{{template "link" .}}{{end}}{{end}}
@@ -199,35 +199,35 @@ const themeLayout = `<!doctype html>
 {{define "img"}}<img src="{{.Src}}"{{if .Srcset}} srcset="{{.Srcset}}"{{end}} alt="{{.Alt}}"{{if .Width}} width="{{.Width}}" height="{{.Height}}"{{end}}{{end}}
 {{define "gallery"}}{{if .}}<ul class="gallery">{{range .}}<li>{{template "picture" (.Sized "(max-width: 600px) 50vw, 16rem" "" true)}}</li>{{end}}</ul>{{end}}{{end}}
 {{define "cards"}}<ul class="cards">{{range .}}<li class="card">{{if .Image.Src}}{{template "picture" (.Image.Sized "(max-width: 600px) 100vw, 22rem" "" true)}}{{end}}<div>{{if .Date}}<time datetime="{{.DateISO}}">{{.Date}}</time>{{end}}<h3><a href="{{.URL}}">{{.Title}}</a></h3>{{if .Excerpt}}<p>{{.Excerpt}}</p>{{end}}</div></li>{{end}}</ul>{{end}}
-{{define "page"}}<article>{{if .ShowHeader}}<div class="eyebrow">برگه</div><h1 class="title">{{.Title}}</h1>{{end}}
+{{define "page"}}<article>{{if .ShowHeader}}<div class="eyebrow">Page</div><h1 class="title">{{.Title}}</h1>{{end}}
 {{if .Content}}<div class="content">{{.Content}}</div>{{end}}
 {{if .Builder}}<div class="builder">{{.Builder}}</div>{{end}}
 {{template "gallery" .Gallery}}{{template "chips" .Tags}}{{with .Comments}}{{template "comments" .}}{{end}}</article>{{end}}
-{{define "comment"}}<article class="comment" id="comment-{{.ID}}"><header><strong>{{.Author}}</strong>{{if .Date}}<time datetime="{{.DateISO}}">{{.Date}}</time>{{end}}{{if .Stars}}<span class="stars" aria-label="امتیاز">{{.Stars}}</span>{{end}}</header><p>{{.Content}}</p></article>{{end}}
-{{define "comments"}}<section class="comments" id="comments"><h2>دیدگاه‌ها ({{.Count}})</h2>{{if .Average}}<p class="avg">میانگین امتیاز: {{.Average}}</p>{{end}}
+{{define "comment"}}<article class="comment" id="comment-{{.ID}}"><header><strong>{{.Author}}</strong>{{if .Date}}<time datetime="{{.DateISO}}">{{.Date}}</time>{{end}}{{if .Stars}}<span class="stars" aria-label="Rating">{{.Stars}}</span>{{end}}</header><p>{{.Content}}</p></article>{{end}}
+{{define "comments"}}<section class="comments" id="comments"><h2>Comments ({{.Count}})</h2>{{if .Average}}<p class="avg">Average rating: {{.Average}}</p>{{end}}
 {{if .Notice}}<p class="notice" role="status">{{.Notice}}</p>{{end}}
-{{range .Items}}<div class="thread">{{template "comment" .}}{{range .Replies}}<div class="reply">{{template "comment" .}}</div>{{end}}<a class="reply-link" href="{{$.FormLink}}?reply={{.ID}}#comment-form">پاسخ</a></div>{{else}}<p class="empty">هنوز دیدگاهی ثبت نشده است.</p>{{end}}
-<form class="comment-form" id="comment-form" method="post" action="{{.Action}}"><h3>{{if .ReplyTo}}پاسخ به {{.ReplyTo.Author}}{{else}}دیدگاه خود را بنویسید{{end}}</h3>
+{{range .Items}}<div class="thread">{{template "comment" .}}{{range .Replies}}<div class="reply">{{template "comment" .}}</div>{{end}}<a class="reply-link" href="{{$.FormLink}}?reply={{.ID}}#comment-form">Reply</a></div>{{else}}<p class="empty">No comments yet.</p>{{end}}
+<form class="comment-form" id="comment-form" method="post" action="{{.Action}}"><h3>{{if .ReplyTo}}Reply to {{.ReplyTo.Author}}{{else}}Write your comment{{end}}</h3>
 {{if .Error}}<p class="error" role="alert">{{.Error}}</p>{{end}}
 <input type="hidden" name="target" value="{{.Target}}">{{if .ReplyTo}}<input type="hidden" name="parent_id" value="{{.ReplyTo.ID}}">{{end}}
-<div class="hp" aria-hidden="true"><label>وب‌سایت <input name="website" tabindex="-1" autocomplete="off"></label></div>
-<label>نام<input name="name" required maxlength="100" autocomplete="name"></label>
-<label>ایمیل (منتشر نمی‌شود)<input name="email" type="email" required maxlength="255" autocomplete="email" dir="ltr"></label>
-{{if not .ReplyTo}}<label>امتیاز<select name="rating"><option value="">بدون امتیاز</option><option value="5">۵ — عالی</option><option value="4">۴</option><option value="3">۳</option><option value="2">۲</option><option value="1">۱</option></select></label>{{end}}
-<label class="wide">متن دیدگاه<textarea name="content" required minlength="3" maxlength="5000" rows="5"></textarea></label>
-<button type="submit">ارسال دیدگاه</button></form></section>{{end}}
+<div class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+<label>Name<input name="name" required maxlength="100" autocomplete="name"></label>
+<label>Email (not published)<input name="email" type="email" required maxlength="255" autocomplete="email" dir="ltr"></label>
+{{if not .ReplyTo}}<label>Rating<select name="rating"><option value="">No rating</option><option value="5">5 — Excellent</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select></label>{{end}}
+<label class="wide">Comment<textarea name="content" required minlength="3" maxlength="5000" rows="5"></textarea></label>
+<button type="submit">Post comment</button></form></section>{{end}}
 {{define "post"}}<article><h1 class="title">{{.Title}}</h1>
 <div class="meta">{{if .Date}}<time datetime="{{.DateISO}}">{{.Date}}</time>{{end}}{{if .Author}}{{if .AuthorURL}}<a href="{{.AuthorURL}}">{{.Author}}</a>{{else}}<span>{{.Author}}</span>{{end}}{{end}}{{range .Categories}}<a href="{{.URL}}">{{.Label}}</a>{{end}}</div>
 {{if .Image.Src}}<figure class="hero-wrap">{{template "picture" (.Image.Sized "(max-width: 800px) 100vw, 48rem" "hero" false)}}</figure>{{end}}
 <div class="content">{{.Content}}</div>
 {{template "gallery" .Gallery}}{{template "chips" .Tags}}
-{{index .Hooks "single.after_article"}}{{if .Related}}{{index .Hooks "single.before_related"}}<section class="related"><h2>نوشته‌های مرتبط</h2>{{template "cards" .Related}}</section>{{index .Hooks "single.after_related"}}{{end}}{{with .Comments}}{{template "comments" .}}{{end}}</article>{{end}}
+{{index .Hooks "single.after_article"}}{{if .Related}}{{index .Hooks "single.before_related"}}<section class="related"><h2>Related posts</h2>{{template "cards" .Related}}</section>{{index .Hooks "single.after_related"}}{{end}}{{with .Comments}}{{template "comments" .}}{{end}}</article>{{end}}
 {{define "list"}}<section>{{if .Kicker}}<div class="eyebrow">{{.Kicker}}</div>{{end}}<h1 class="title">{{.Heading}}</h1>
 {{if .Description}}<div class="content">{{.Description}}</div>{{end}}
 {{if .Items}}{{template "cards" .Items}}{{else}}<p class="empty">{{.Empty}}</p>{{end}}
-{{if .Pagination}}<nav aria-label="صفحه‌ها"><ul class="pager">{{range .Pagination}}<li><a href="{{.URL}}"{{if .Current}} aria-current="page"{{end}}>{{.Label}}</a></li>{{end}}</ul></nav>{{end}}
-{{if .Pages}}<h2>برگه‌ها</h2>{{template "cards" .Pages}}{{end}}</section>{{end}}
-{{define "terms"}}<section><h1 class="title">{{.Heading}}</h1>{{if .Items}}<ul class="terms">{{range .Items}}<li style="padding-inline-start:{{.Depth}}.5rem"><a href="{{.URL}}">{{.Name}}</a>{{if .Count}}<span class="count">{{.Count}}</span>{{end}}</li>{{end}}</ul>{{else}}<p class="empty">موردی نیست.</p>{{end}}</section>{{end}}`
+{{if .Pagination}}<nav aria-label="Pages"><ul class="pager">{{range .Pagination}}<li><a href="{{.URL}}"{{if .Current}} aria-current="page"{{end}}>{{.Label}}</a></li>{{end}}</ul></nav>{{end}}
+{{if .Pages}}<h2>Pages</h2>{{template "cards" .Pages}}{{end}}</section>{{end}}
+{{define "terms"}}<section><h1 class="title">{{.Heading}}</h1>{{if .Items}}<ul class="terms">{{range .Items}}<li style="padding-inline-start:{{.Depth}}.5rem"><a href="{{.URL}}">{{.Name}}</a>{{if .Count}}<span class="count">{{.Count}}</span>{{end}}</li>{{end}}</ul>{{else}}<p class="empty">Nothing here.</p>{{end}}</section>{{end}}`
 
 var siteTemplate = template.Must(template.Must(template.New("site").Parse(themeLayout)).Parse(pictureTemplate))
 
@@ -310,7 +310,7 @@ func plainText(html string, n int) string {
 	return strings.TrimSpace(string(r[:n])) + "…"
 }
 
-var jalaliMonths = []string{"فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"}
+var jalaliMonths = []string{"Farvardin", "Ordibehesht", "Khordad", "Tir", "Mordad", "Shahrivar", "Mehr", "Aban", "Azar", "Dey", "Bahman", "Esfand"}
 
 // toJalali converts a Gregorian date to the Jalali (Solar Hijri) calendar.
 func toJalali(gy, gm, gd int) (int, int, int) {
@@ -337,15 +337,15 @@ func toJalali(gy, gm, gd int) (int, int, int) {
 	return jy, jm, jd
 }
 
-// formatDate is a date for readers: Jalali with Persian digits ("۳۰ آبان ۱۴۰۵"), or with
-// the site's date_calendar setting "gregorian", MKSine's Y-m-d ("۲۰۲۶-۱۱-۲۱").
+// formatDate is a date for readers: Jalali ("30 Aban 1405"), or with
+// the site's date_calendar setting "gregorian", MKSine's Y-m-d ("2026-11-21").
 func formatDate(t *time.Time, calendar ...string) (string, string) {
 	if t == nil || t.IsZero() {
 		return "", ""
 	}
 	if len(calendar) > 0 && calendar[0] == "gregorian" {
-		return persianDigits.Replace(t.Format("2006-01-02")), t.Format(time.RFC3339)
+		return t.Format("2006-01-02"), t.Format(time.RFC3339)
 	}
 	jy, jm, jd := toJalali(t.Year(), int(t.Month()), t.Day())
-	return persianDigits.Replace(fmt.Sprintf("%d %s %d", jd, jalaliMonths[jm-1], jy)), t.Format(time.RFC3339)
+	return fmt.Sprintf("%d %s %d", jd, jalaliMonths[jm-1], jy), t.Format(time.RFC3339)
 }

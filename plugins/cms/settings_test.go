@@ -22,7 +22,7 @@ func TestPermalinkRule(t *testing.T) {
 		{slug, "/{slug}/{slug}", "", true},
 		{slug, "/blog/{id}", "", true},
 		{slug, "/Blog/{slug}", "", true},
-		{slug, "/بلاگ/{slug}", "", true},
+		{slug, "/блог/{slug}", "", true},
 		{slug, "javascript:alert(1)", "", true},
 		{none, "/articles", "/articles", false},
 		{none, "/articles/{slug}", "", true},
@@ -65,10 +65,10 @@ func TestCoreSettingRules(t *testing.T) {
 
 func TestGregorianDates(t *testing.T) {
 	d := time.Date(2026, 11, 21, 10, 0, 0, 0, time.UTC)
-	if got, _ := formatDate(&d, "gregorian"); got != "۲۰۲۶-۱۱-۲۱" {
+	if got, _ := formatDate(&d, "gregorian"); got != "2026-11-21" {
 		t.Errorf("gregorian = %q", got)
 	}
-	if got, _ := formatDate(&d, "shamsi"); got != "۳۰ آبان ۱۴۰۵" {
+	if got, _ := formatDate(&d, "shamsi"); got != "30 Aban 1405" {
 		t.Errorf("shamsi = %q", got)
 	}
 }
